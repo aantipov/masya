@@ -3,6 +3,11 @@ dist/
 # generated types
 .astro/
 
+# wrangler project
+_worker.bundle
+.dev.vars
+.wrangler/
+
 # dependencies
 node_modules/
 

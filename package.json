@@ -1,0 +1,21 @@
+{
+  "name": "masya",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "pages:dev": "wrangler pages dev --compatibility-date=2023-12-06 -- astro dev",
+    "pages:deploy": "astro build && wrangler pages deploy ./dist"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^8.0.0",
+    "astro": "^4.0.3"
+  },
+  "devDependencies": {
+    "wrangler": "^3.19.0"
+  }
+}

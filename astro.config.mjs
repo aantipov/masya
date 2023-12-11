@@ -1,6 +1,7 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import tailwind from '@astrojs/tailwind';
+import solidJs from '@astrojs/solid-js';
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,5 +13,5 @@ export default defineConfig({
       include: ['/api/*'], // handled by custom function: functions/api/id].js
     },
   }),
-  integrations: [tailwind()],
+  integrations: [tailwind(), solidJs()],
 });

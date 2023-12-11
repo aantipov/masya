@@ -1,5 +1,5 @@
 ---
-
+import App from '../App.tsx';
 ---
 
 <html lang="en">
@@ -18,139 +18,63 @@
   >
     <div class="flex h-screen" id="container">
       <!-- Left Panel: History of User Prompts -->
-      <section
-        id="leftPanel"
-        class="flex w-1/2 flex-col border-r border-gray-600 bg-gray-700"
-      >
-        <!-- Scrollable User Prompts History -->
-        <div
-          id="promptsHistory"
-          class="flex-grow space-y-6 overflow-y-auto p-8"
-        >
-          <!-- Example Prompts (Clickable and Responsive) -->
-          <!-- Previous prompts here... -->
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:bg-gray-700"
-            onclick="displayUI(1)"
-          >
-            <p>User: Create a header with navigation links...</p>
-            <a href="#" class="text-sm text-blue-500 hover:text-blue-700"
-              >Expand</a
-            >
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:bg-gray-700"
-            onclick="displayUI(2)"
-          >
-            <p>User: Add a responsive sidebar</p>
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:bg-gray-700"
-            onclick="displayUI(3)"
-          >
-            <p>User: Design a user profile card...</p>
-            <a href="#" class="text-sm text-blue-500 hover:text-blue-700"
-              >Expand</a
-            >
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:bg-gray-700"
-            onclick="displayUI(4)"
-          >
-            <p>User: Implement a photo gallery grid</p>
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:bg-gray-700 hover:shadow-md"
-            onclick="displayUI(5)"
-          >
-            <p>User: Build a contact form with validation...</p>
-            <a href="#" class="text-sm text-blue-500 hover:text-blue-700"
-              >Expand</a
-            >
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:border hover:border-gray-400 hover:bg-gray-700"
-            onclick="displayUI(6)"
-          >
-            <p>User: Create a footer with social media links</p>
-          </div>
-          <div
-            class="prompt cursor-pointer rounded bg-gray-700 p-4 text-white"
-            onclick="displayUI(7)"
-          >
-            <p>User: Add a modal for newsletter subscription...</p>
-            <a href="#" class="text-sm text-blue-500 hover:text-blue-700"
-              >Expand</a
-            >
-          </div>
-          <!-- The last prompt with special highlighting to indicate selection -->
-          <div
-            class="prompt cursor-pointer rounded bg-gray-600 p-4 text-white hover:border hover:border-gray-400 hover:bg-gray-500"
-            onclick="displayUI(8)"
-          >
-            <p>User: Implement a dark mode toggle feature</p>
-          </div>
-        </div>
-        <!-- Fixed Input Area for New Prompt -->
-        <div class="bg-gray-800 p-8">
-          <textarea
-            id="userInput"
-            class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"
-            placeholder="Describe your UI or changes..."></textarea>
-          <button
-            id="sendInput"
-            class="mt-2 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-            >Send</button
-          >
-        </div>
+      <section id="leftPanel" class="flex w-1/2 flex-col bg-gray-700">
+        <App client:load />
       </section>
 
-      <div id="divider" class="w-3 cursor-col-resize bg-gray-700">
-        <div class="inner"></div>
+      <div
+        id="divider"
+        class="w-3 cursor-col-resize bg-gray-700 hover:bg-slate-400"
+      >
+        <div class="mx-auto h-full w-0.5 border border-gray-500"></div>
       </div>
 
       <!-- Right Panel: Result of Last UI Generation -->
       <section id="rightPanel" class="w-1/2 bg-gray-700 p-8">
         <div id="uiResult" class="rounded bg-white p-4 text-black">
-          <!-- The UI corresponding to the selected prompt will be displayed here -->
+          {
+            /* The UI corresponding to the selected prompt will be displayed here  */
+          }
         </div>
       </section>
+
+      <script>
+        // Make the left and right panels resizable.
+        const divider = document.getElementById('divider') as HTMLDivElement;
+        const leftPanel = document.getElementById(
+          'leftPanel',
+        ) as HTMLDivElement;
+        const rightPanel = document.getElementById(
+          'rightPanel',
+        ) as HTMLDivElement;
+
+        let mousedown = false;
+
+        divider.addEventListener('mousedown', function (e) {
+          mousedown = true;
+        });
+
+        window.addEventListener('mousemove', function (e) {
+          // We don't want to do anything if we aren't dragging.
+          if (!mousedown) {
+            return;
+          }
+
+          e.preventDefault();
+
+          const container = divider.parentNode as HTMLDivElement;
+          const containerWidth = container.clientWidth;
+          const leftPanelWidth = (e.clientX / containerWidth) * 100;
+          const rightPanelWidth = 100 - leftPanelWidth;
+
+          leftPanel.style.width = `${leftPanelWidth}%`;
+          rightPanel.style.width = `${rightPanelWidth}%`;
+        });
+
+        window.addEventListener('mouseup', function (e) {
+          mousedown = false;
+        });
+      </script>
     </div>
-
-    <script>
-      // Make the left and right panels resizable.
-      const divider = document.getElementById('divider') as HTMLDivElement;
-      const leftPanel = document.getElementById('leftPanel') as HTMLDivElement;
-      const rightPanel = document.getElementById(
-        'rightPanel',
-      ) as HTMLDivElement;
-
-      let mousedown = false;
-
-      divider.addEventListener('mousedown', function (e) {
-        mousedown = true;
-      });
-
-      window.addEventListener('mousemove', function (e) {
-        // We don't want to do anything if we aren't dragging.
-        if (!mousedown) {
-          return;
-        }
-
-        e.preventDefault();
-
-        const container = divider.parentNode as HTMLDivElement;
-        const containerWidth = container.clientWidth;
-        const leftPanelWidth = (e.clientX / containerWidth) * 100;
-        const rightPanelWidth = 100 - leftPanelWidth;
-
-        leftPanel.style.width = `${leftPanelWidth}%`;
-        rightPanel.style.width = `${rightPanelWidth}%`;
-      });
-
-      window.addEventListener('mouseup', function (e) {
-        mousedown = false;
-      });
-    </script>
   </body>
 </html>

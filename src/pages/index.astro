@@ -9,13 +9,19 @@
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Masya</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"
+    ></script>
   </head>
   <body
     class="bg-gray-800 font-sans leading-normal tracking-normal text-gray-300"
   >
-    <div class="flex h-screen">
+    <div class="flex h-screen" id="container">
       <!-- Left Panel: History of User Prompts -->
-      <section class="flex w-1/2 flex-col border-r border-gray-600 bg-gray-700">
+      <section
+        id="leftPanel"
+        class="flex w-1/2 flex-col border-r border-gray-600 bg-gray-700"
+      >
         <!-- Scrollable User Prompts History -->
         <div
           id="promptsHistory"
@@ -99,12 +105,52 @@
         </div>
       </section>
 
+      <div id="divider" class="w-3 cursor-col-resize bg-gray-700">
+        <div class="inner"></div>
+      </div>
+
       <!-- Right Panel: Result of Last UI Generation -->
-      <section class="w-1/2 bg-gray-700 p-8">
+      <section id="rightPanel" class="w-1/2 bg-gray-700 p-8">
         <div id="uiResult" class="rounded bg-white p-4 text-black">
           <!-- The UI corresponding to the selected prompt will be displayed here -->
         </div>
       </section>
     </div>
+
+    <script>
+      // Make the left and right panels resizable.
+      const divider = document.getElementById('divider') as HTMLDivElement;
+      const leftPanel = document.getElementById('leftPanel') as HTMLDivElement;
+      const rightPanel = document.getElementById(
+        'rightPanel',
+      ) as HTMLDivElement;
+
+      let mousedown = false;
+
+      divider.addEventListener('mousedown', function (e) {
+        mousedown = true;
+      });
+
+      window.addEventListener('mousemove', function (e) {
+        // We don't want to do anything if we aren't dragging.
+        if (!mousedown) {
+          return;
+        }
+
+        e.preventDefault();
+
+        const container = divider.parentNode as HTMLDivElement;
+        const containerWidth = container.clientWidth;
+        const leftPanelWidth = (e.clientX / containerWidth) * 100;
+        const rightPanelWidth = 100 - leftPanelWidth;
+
+        leftPanel.style.width = `${leftPanelWidth}%`;
+        rightPanel.style.width = `${rightPanelWidth}%`;
+      });
+
+      window.addEventListener('mouseup', function (e) {
+        mousedown = false;
+      });
+    </script>
   </body>
 </html>

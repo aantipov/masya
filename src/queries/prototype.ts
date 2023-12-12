@@ -3,8 +3,8 @@ import ky from 'ky';
 
 export function makePrototypeMutation() {
   return createMutation(() => ({
-    mutationFn: (inp: string) => {
-      return ky.post('/api/prototype').json();
+    mutationFn: (prompt: string) => {
+      return ky.post('/api/prototype', { json: { prompt } }).json();
     },
   }));
 }

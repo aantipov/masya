@@ -4,15 +4,15 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "astro dev",
+    "dev": "astro dev --port 3000",
     "start": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "functions:dev": "astro build && wrangler pages dev ./dist --port=3000",
     "pages:dev": "wrangler pages dev --compatibility-date=2023-12-06 -- astro dev",
-    "pages:deploy": "astro build && wrangler pages deploy ./dist",
-    "pages:deploy:prod": "astro build && wrangler pages deploy ./dist --branch master",
+    "deploy": "astro build && wrangler pages deploy ./dist",
+    "deploy:prod": "astro build && wrangler pages deploy ./dist --branch master",
     "format": "prettier --write .",
     "wrangler": "wrangler"
   },

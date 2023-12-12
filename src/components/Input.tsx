@@ -4,9 +4,13 @@ import { createSignal } from 'solid-js';
 export default function Input() {
   const protoM = makePrototypeMutation();
   const [prompt, setPrompt] = createSignal('');
+  const [aiKey, setAIKey] = createSignal('');
   const handleSubmit = (e: Event) => {
     e.preventDefault();
-    protoM.mutate(prompt());
+    protoM.mutate({
+      prompt: prompt(),
+      aiKey: aiKey(),
+    });
   };
 
   return (
@@ -19,6 +23,14 @@ export default function Input() {
           }
         }}
       >
+        <input
+          type="password"
+          class="h-200px mb-2 w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"
+          placeholder="OPENAI API KEY"
+          onInput={(event) => {
+            setAIKey(event.target.value);
+          }}
+        />
         <textarea
           id="userInput"
           class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"

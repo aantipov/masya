@@ -4,5 +4,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
   //     headers: [],
   //   });
   const body = await request.json();
-  return new Response(JSON.stringify({ message: body }));
+  return new Response(
+    JSON.stringify({ prompt: body.prompt, aiKey: body.aiKey.slice(2, 6) }),
+  );
 };

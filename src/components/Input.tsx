@@ -1,16 +1,21 @@
 import { makePrototypeMutation } from '@/queries/prototype';
 import { createSignal } from 'solid-js';
 
-export default function Input() {
+interface InputProps {
+  setPrototype: (value: string) => void;
+}
+
+export default function Input({ setPrototype }: InputProps) {
   const protoM = makePrototypeMutation();
   const [prompt, setPrompt] = createSignal('');
   const [aiKey, setAIKey] = createSignal('');
-  const handleSubmit = (e: Event) => {
+  const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    protoM.mutate({
+    const result = await protoM.mutateAsync({
       prompt: prompt(),
       aiKey: aiKey(),
     });
+    setPrototype(result);
   };
 
   return (
@@ -27,6 +32,7 @@ export default function Input() {
           type="password"
           class="h-200px mb-2 w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"
           placeholder="OPENAI API KEY"
+          autocomplete="off"
           onInput={(event) => {
             setAIKey(event.target.value);
           }}

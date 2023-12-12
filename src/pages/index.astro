@@ -1,5 +1,5 @@
 ---
-import App from '../App.tsx';
+import App from '@/App.tsx';
 ---
 
 <html lang="en">
@@ -16,65 +16,41 @@ import App from '../App.tsx';
   <body
     class="bg-gray-800 font-sans leading-normal tracking-normal text-gray-300"
   >
-    <div class="flex h-screen" id="container">
-      <!-- Left Panel: History of User Prompts -->
-      <section id="leftPanel" class="flex w-1/2 flex-col bg-gray-700">
-        <App client:load />
-      </section>
+    <App client:load />
+    <script>
+      // Make the left and right panels resizable.
+      const divider = document.getElementById('divider') as HTMLDivElement;
+      const leftPanel = document.getElementById('leftPanel') as HTMLDivElement;
+      const rightPanel = document.getElementById(
+        'rightPanel',
+      ) as HTMLDivElement;
 
-      <div
-        id="divider"
-        class="w-3 cursor-col-resize bg-gray-700 hover:bg-slate-400"
-      >
-        <div class="mx-auto h-full w-0.5 border border-gray-500"></div>
-      </div>
+      let mousedown = false;
 
-      <!-- Right Panel: Result of Last UI Generation -->
-      <section id="rightPanel" class="w-1/2 bg-gray-700 p-8">
-        <div id="uiResult" class="rounded bg-white p-4 text-black">
-          {
-            /* The UI corresponding to the selected prompt will be displayed here  */
-          }
-        </div>
-      </section>
+      divider.addEventListener('mousedown', function (e) {
+        mousedown = true;
+      });
 
-      <script>
-        // Make the left and right panels resizable.
-        const divider = document.getElementById('divider') as HTMLDivElement;
-        const leftPanel = document.getElementById(
-          'leftPanel',
-        ) as HTMLDivElement;
-        const rightPanel = document.getElementById(
-          'rightPanel',
-        ) as HTMLDivElement;
+      window.addEventListener('mousemove', function (e) {
+        // We don't want to do anything if we aren't dragging.
+        if (!mousedown) {
+          return;
+        }
 
-        let mousedown = false;
+        e.preventDefault();
 
-        divider.addEventListener('mousedown', function (e) {
-          mousedown = true;
-        });
+        const container = divider.parentNode as HTMLDivElement;
+        const containerWidth = container.clientWidth;
+        const leftPanelWidth = (e.clientX / containerWidth) * 100;
+        const rightPanelWidth = 100 - leftPanelWidth;
 
-        window.addEventListener('mousemove', function (e) {
-          // We don't want to do anything if we aren't dragging.
-          if (!mousedown) {
-            return;
-          }
+        leftPanel.style.width = `${leftPanelWidth}%`;
+        rightPanel.style.width = `${rightPanelWidth}%`;
+      });
 
-          e.preventDefault();
-
-          const container = divider.parentNode as HTMLDivElement;
-          const containerWidth = container.clientWidth;
-          const leftPanelWidth = (e.clientX / containerWidth) * 100;
-          const rightPanelWidth = 100 - leftPanelWidth;
-
-          leftPanel.style.width = `${leftPanelWidth}%`;
-          rightPanel.style.width = `${rightPanelWidth}%`;
-        });
-
-        window.addEventListener('mouseup', function (e) {
-          mousedown = false;
-        });
-      </script>
-    </div>
+      window.addEventListener('mouseup', function (e) {
+        mousedown = false;
+      });
+    </script>
   </body>
 </html>

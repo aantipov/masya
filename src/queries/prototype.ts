@@ -12,7 +12,7 @@ export function makePrototypeMutation() {
       aiKey: string;
     }) => {
       const resp = await ky
-        .post('/api/prototype', { json: { prompt, aiKey } })
+        .post('/api/prototype', { json: { prompt, aiKey }, timeout: false })
         .json<OpenAI.ChatCompletionMessage>();
       const contentStr = resp.content as string;
       const content = JSON.parse(contentStr);

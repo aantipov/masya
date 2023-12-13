@@ -1,21 +1,32 @@
 import { makePrototypeMutation } from '@/queries/prototype';
-import { createSignal } from 'solid-js';
+import { setErrorMap } from 'astro/zod';
+import { Show, createSignal } from 'solid-js';
 
 interface InputProps {
   setPrototype: (value: string) => void;
+  setIsError: (value: boolean) => void;
 }
 
-export default function Input({ setPrototype }: InputProps) {
-  const protoM = makePrototypeMutation();
+export default function Input({ setPrototype, setIsError }: InputProps) {
+  let openAiKey;
+  if (typeof window !== 'undefined') {
+    openAiKey = window.localStorage.getItem('openai-key');
+  }
+  const prototypeM = makePrototypeMutation();
   const [prompt, setPrompt] = createSignal('');
-  const [aiKey, setAIKey] = createSignal('');
+  const [aiKey, setAIKey] = createSignal(openAiKey || '');
   const handleSubmit = async (e: Event) => {
     e.preventDefault();
-    const result = await protoM.mutateAsync({
-      prompt: prompt(),
-      aiKey: aiKey(),
-    });
-    setPrototype(result);
+    try {
+      const result = await prototypeM.mutateAsync({
+        prompt: prompt(),
+        aiKey: aiKey(),
+      });
+      setPrototype(result);
+      setIsError(false);
+    } catch (error) {
+      setIsError(true);
+    }
   };
 
   return (
@@ -49,13 +60,24 @@ export default function Input({ setPrototype }: InputProps) {
         </textarea>
 
         <div class="flex justify-end">
-          <button
-            type="submit"
-            disabled={protoM.isPending}
-            class="mt-2 self-end rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-          >
-            Send
-          </button>
+          <Show when={!prototypeM.isPending}>
+            <button
+              type="submit"
+              disabled={prototypeM.isPending}
+              class="mt-2 self-end rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
+            >
+              Generate
+            </button>
+          </Show>
+          <Show when={prototypeM.isPending}>
+            <button
+              type="submit"
+              disabled
+              class="`mt-2 cursor-not-allowed self-end rounded bg-blue-300 px-4 py-2 text-white"
+            >
+              Generating...
+            </button>
+          </Show>
         </div>
       </form>
     </div>

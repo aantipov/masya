@@ -9,7 +9,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     model: 'gpt-3.5-turbo',
     messages: getMessages(prompt),
     temperature: 0.1,
-    max_tokens: 450,
+    max_tokens: 1450,
   });
 
   return new Response(JSON.stringify(response.choices[0].message));

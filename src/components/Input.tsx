@@ -1,32 +1,23 @@
 import { makePrototypeMutation } from '@/queries/prototype';
-import { setErrorMap } from 'astro/zod';
 import { Show, createSignal } from 'solid-js';
 
 interface InputProps {
-  setPrototype: (value: string) => void;
-  setIsError: (value: boolean) => void;
+  prototypeM: ReturnType<typeof makePrototypeMutation>;
 }
 
-export default function Input({ setPrototype, setIsError }: InputProps) {
+export default function Input({ prototypeM }: InputProps) {
   let openAiKey;
   if (typeof window !== 'undefined') {
     openAiKey = window.localStorage.getItem('openai-key');
   }
-  const prototypeM = makePrototypeMutation();
   const [prompt, setPrompt] = createSignal('');
   const [aiKey, setAIKey] = createSignal(openAiKey || '');
-  const handleSubmit = async (e: Event) => {
+  const handleSubmit = (e: Event) => {
     e.preventDefault();
-    try {
-      const result = await prototypeM.mutateAsync({
-        prompt: prompt(),
-        aiKey: aiKey(),
-      });
-      setPrototype(result);
-      setIsError(false);
-    } catch (error) {
-      setIsError(true);
-    }
+    prototypeM.mutate({
+      prompt: prompt(),
+      aiKey: aiKey(),
+    });
   };
 
   return (

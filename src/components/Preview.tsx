@@ -2,28 +2,34 @@ import {
   Match,
   Show,
   Switch,
-  createMemo,
-  createResource,
   createSignal,
+  type Accessor,
+  createDeferred,
+  createEffect,
 } from 'solid-js';
-import * as prettier from 'prettier';
-import prettierHtmlParser from 'prettier/plugins/html';
-import hljs from 'highlight.js/lib/core';
-import hlHtml from 'highlight.js/lib/languages/xml';
-import 'highlight.js/styles/github.css';
-import 'highlight.js/styles/atom-one-dark.css';
 import type { makePrototypeMutation } from '@/queries/prototype';
+import PreviewSourceCode from './PreviewSourceCode';
+import getPrettiedCode from '@/helpers/getPrettiedCode';
 
 interface PreviewProps {
   prototypeM: ReturnType<typeof makePrototypeMutation>;
+  prototypeStream: Accessor<string>;
 }
 
-export default function Preview({ prototypeM }: PreviewProps) {
-  hljs.registerLanguage('javascript', hlHtml);
+export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
   const [showCode, setShowCode] = createSignal(false);
+  const deferredStream = createDeferred(prototypeStream, { timeoutMs: 300 });
+  let iframeRef: HTMLIFrameElement;
 
-  const fullPrototype = createMemo(
-    () => `
+  createEffect(() => {
+    iframeRef.contentWindow?.postMessage(deferredStream(), '*');
+  });
+
+  const showIframe = () => {
+    return deferredStream() && !prototypeM.isError && !showCode();
+  };
+
+  const iframeHtml = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -32,96 +38,84 @@ export default function Preview({ prototypeM }: PreviewProps) {
         <script src="https://cdn.tailwindcss.com"></script> 
       </head>
       <body>
-        <div>${prototypeM.data}</div>
+        <div id="content"></div>
+        <script>
+          window.addEventListener('message', (event) => {
+            document.getElementById('content').innerHTML = event.data;
+          }, false);
+        </script>
       </body>
     </html> 
-    `,
-  );
+  `;
 
-  const [prettiedHtml] = createResource(
-    () => prototypeM.data,
-    async (val) => {
-      if (typeof window != undefined) {
-        const res = await prettier.format(`<div>${val}</div>`, {
-          parser: 'html',
-          plugins: [prettierHtmlParser],
-        });
-        return res;
-      }
-      return '';
-    },
+  const actionsToolbar = (
+    <div class="absolute right-0 top-0 z-10 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
+      {/* Copy to clipboard */}
+      <button
+        class="mr-2 rounded bg-white p-1 text-sm text-black"
+        onClick={async () => {
+          const prettiedHtml = prototypeM.data
+            ? await getPrettiedCode(prototypeM.data)
+            : '';
+          navigator.clipboard.writeText(prettiedHtml);
+        }}
+      >
+        Copy
+      </button>
+
+      {/* Show source code */}
+      <button
+        class="rounded bg-white p-1 text-sm text-black"
+        onClick={() => setShowCode(!showCode())}
+      >
+        {'</>'}
+      </button>
+    </div>
   );
-  const beautifiedHtml = createMemo(() => {
-    const res = hljs.highlight(prettiedHtml() || '', {
-      language: 'html',
-    }).value;
-    return res;
-  });
 
   return (
     <div class="h-full">
-      <Switch fallback={<div>Fallback</div>}>
-        <Match when={!showCode()}>
-          <Show when={!prototypeM.data && prototypeM.isError}>
+      {actionsToolbar}
+
+      {/* Iframe with the generated UI */}
+      <iframe
+        ref={iframeRef}
+        srcdoc={iframeHtml}
+        title="Preview"
+        sandbox="allow-scripts"
+        width="100%"
+        height="100%"
+        class={`h-full ${showIframe() ? '' : 'hidden'}`}
+      />
+
+      {/* Display Initial Fallback message or source code */}
+      <Show when={!showIframe()}>
+        <Switch>
+          <Match when={showCode()}>
+            <PreviewSourceCode prototypeM={prototypeM} />
+          </Match>
+
+          <Match when={!prototypeM.data && prototypeM.isError}>
             <div>
               <h1 class="text-center text-2xl font-bold text-red-500">Error</h1>
               <h2 class="mt-4 text-center text-xl font-bold">
                 Please try again
               </h2>
+              <div>
+                <pre>{JSON.stringify(prototypeM.error, null, 2)}</pre>
+              </div>
             </div>
-          </Show>
-          <Show when={!prototypeM.data && !prototypeM.isError}>
+          </Match>
+          <Match when={!prototypeM.data && !prototypeM.isError}>
             <div>
               <h1 class="text-center text-2xl font-bold">Preview Section</h1>
               <h2 class="mt-4 text-center text-xl font-bold">
                 of your prototype
               </h2>
             </div>
-          </Show>
-          <Show when={prototypeM.data && !prototypeM.isError}>
-            <iframe
-              srcdoc={fullPrototype()}
-              title="Preview"
-              sandbox="allow-scripts"
-              width="100%"
-              height="100%"
-              class="h-full"
-            />
-          </Show>
-        </Match>
-
-        {/* Show source code */}
-        <Match when={showCode()}>
-          <pre class="theme-atom-one-dark shadow-3xl tab-size relative h-full max-w-full overflow-hidden overflow-y-scroll rounded-md text-sm">
-            <span class="hljs mb-0 block min-h-full overflow-auto p-4">
-              <code innerHTML={beautifiedHtml()} />
-            </span>
-          </pre>
-        </Match>
-      </Switch>
-
-      {/* Actions Toolbar  */}
-      <div class="absolute right-0 top-0 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
-        {showCode() && (
-          <button
-            class="mr-2 rounded bg-white p-1 text-sm text-black"
-            onClick={() => {
-              // copy to clipboard
-              if (typeof window != undefined) {
-                navigator.clipboard.writeText(prettiedHtml() || '');
-              }
-            }}
-          >
-            Copy
-          </button>
-        )}
-        <button
-          class="rounded bg-white p-1 text-sm text-black"
-          onClick={() => setShowCode(!showCode())}
-        >
-          {'</>'}
-        </button>
-      </div>
+          </Match>
+        </Switch>
+      </Show>
     </div>
   );
 }

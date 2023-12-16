@@ -3,16 +3,21 @@ import { makePrototypeMutation } from '@/queries/prototype';
 import Input from './components/Input';
 import History from './components/History';
 import Preview from './components/Preview';
+import { createSignal } from 'solid-js';
 
 export default function AppContent() {
   const prototypeM = makePrototypeMutation();
+  const [prototypeStream, setPrototypeStream] = createSignal('');
 
   return (
     <div class="flex h-screen" id="container">
       {/* Left Panel: History of User Prompts */}
       <section id="leftPanel" class="flex w-1/3 flex-col bg-gray-700">
         <History />
-        <Input prototypeM={prototypeM} />
+        <Input
+          prototypeM={prototypeM}
+          setPrototypeStream={setPrototypeStream}
+        />
       </section>
 
       <div
@@ -28,7 +33,7 @@ export default function AppContent() {
           id="uiResult"
           class="group/toolbar relative h-full rounded bg-white p-6 text-black"
         >
-          <Preview prototypeM={prototypeM} />
+          <Preview prototypeM={prototypeM} prototypeStream={prototypeStream} />
         </div>
       </section>
     </div>

@@ -5,14 +5,35 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
   const { prompt, aiKey: apiKey } = await request.json();
   const openai = new OpenAI({ apiKey });
 
-  const response = await openai.chat.completions.create({
+  const stream = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: getMessages(prompt),
+    stream: true,
     temperature: 0.1,
     max_tokens: 1450,
   });
+  let { readable, writable } = new TransformStream();
+  const writer = writable.getWriter();
+  const textEncoder = new TextEncoder();
+  // loop over the data as it is streamed from OpenAI and write it using our writeable
+  (async () => {
+    for await (const chunk of stream) {
+      // every chunk has the following form:
+      /* chunk {
+        id: 'chatcmpl-8VuadGcFgVmrLSSBeIywZkM2n1zVm',
+        object: 'chat.completion.chunk',
+        created: 1702616391,
+        model: 'gpt-3.5-turbo-0613',
+        system_fingerprint: null,
+        choices: [ { index: 0, delta: { content: 'div }, finish_reason: null } ]
+      }*/
 
-  return new Response(JSON.stringify(response.choices[0].message));
+      writer.write(textEncoder.encode(chunk.choices[0]?.delta?.content || ''));
+    }
+    writer.close();
+  })();
+
+  return new Response(readable, { headers: { 'Content-Type': 'text/html' } });
 };
 
 function getMessages(prompt: string): OpenAI.ChatCompletionMessageParam[] {

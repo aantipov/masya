@@ -4,7 +4,6 @@ import {
   Switch,
   createSignal,
   type Accessor,
-  createDeferred,
   createEffect,
 } from 'solid-js';
 import type { makePrototypeMutation } from '@/queries/prototype';
@@ -18,15 +17,14 @@ interface PreviewProps {
 
 export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
   const [showCode, setShowCode] = createSignal(false);
-  const deferredStream = createDeferred(prototypeStream, { timeoutMs: 300 });
   let iframeRef: HTMLIFrameElement;
 
   createEffect(() => {
-    iframeRef.contentWindow?.postMessage(deferredStream(), '*');
+    iframeRef.contentWindow?.postMessage(prototypeStream(), '*');
   });
 
   const showIframe = () => {
-    return deferredStream() && !prototypeM.isError && !showCode();
+    return prototypeStream() && !prototypeM.isError && !showCode();
   };
 
   const iframeHtml = `

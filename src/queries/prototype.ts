@@ -31,7 +31,7 @@ export function makePrototypeMutation() {
             if (!done) {
               const chunk = textDecoder.decode(value);
               result += chunk;
-              setPrototypeStream(parsePartialJSON(result) || '');
+              setPrototypeStream(result || '');
             }
           } catch (error) {
             console.error('Stream reading error:', error);
@@ -44,23 +44,9 @@ export function makePrototypeMutation() {
       // Start reading the stream
       await read();
 
-      const content = JSON.parse(result);
-      setPrototypeStream(content.html);
+      setPrototypeStream(result);
 
-      return content.html;
+      return result;
     },
   }));
-}
-
-function parsePartialJSON(jsonStr: string): string | null {
-  // Regular expression to find the "html" key and its value, accounting for escaped quotes and line breaks
-  const start = jsonStr.indexOf('"<');
-  const end = jsonStr.lastIndexOf('>"');
-  if (start === -1) {
-    return '';
-  }
-  return jsonStr
-    .slice(start + 1, end === -1 ? jsonStr.length : end + 1)
-    .replaceAll('\\"', '"')
-    .replaceAll('\\n', '');
 }

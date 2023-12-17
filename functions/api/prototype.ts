@@ -3,8 +3,20 @@ import OpenAI from 'openai';
 export const onRequestPost: PagesFunction = async ({ request }) => {
   // @ts-ignore
   const { prompt, aiKey: apiKey } = await request.json();
-  const openai = new OpenAI({ apiKey });
 
+  if (!apiKey || !prompt) {
+    return new Response('Invalid request', { status: 400 });
+  }
+
+  try {
+    return handleRequest(prompt, apiKey);
+  } catch (error) {
+    return new Response('Internal server error', { status: 500 });
+  }
+};
+
+async function handleRequest(prompt: string, apiKey: string) {
+  const openai = new OpenAI({ apiKey });
   const stream = await openai.chat.completions.create({
     model: 'gpt-3.5-turbo',
     messages: getMessages(prompt),
@@ -34,7 +46,7 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
   })();
 
   return new Response(readable, { headers: { 'Content-Type': 'text/html' } });
-};
+}
 
 function getMessages(prompt: string): OpenAI.ChatCompletionMessageParam[] {
   return [

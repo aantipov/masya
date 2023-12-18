@@ -14,7 +14,8 @@
     "deploy": "astro build && wrangler pages deploy ./dist",
     "deploy:prod": "astro build && wrangler pages deploy ./dist --branch master",
     "format": "prettier --write .",
-    "wrangler": "wrangler"
+    "wrangler": "wrangler",
+    "tail": "wrangler pages deployment tail"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^8.0.0",
@@ -34,6 +35,6 @@
     "prettier-plugin-astro": "^0.12.2",
     "prettier-plugin-tailwindcss": "^0.5.9",
     "solid-devtools": "^0.29.2",
-    "wrangler": "^3.19.0"
+    "wrangler": "^3.21.0"
   }
 }

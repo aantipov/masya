@@ -1,5 +1,15 @@
 import OpenAI from 'openai';
 
+export const onRequestOptions: PagesFunction = async ({ request }) => {
+  return new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
+};
+
 export const onRequestPost: PagesFunction = async ({ request }) => {
   // @ts-ignore
   const { prompt, aiKey: apiKey } = await request.json();
@@ -9,8 +19,9 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
   }
 
   try {
-    return handleRequest(prompt, apiKey);
+    return await handleRequest(prompt, apiKey);
   } catch (error) {
+    console.error('Error:', error);
     return new Response('Internal server error', { status: 500 });
   }
 };
@@ -24,28 +35,46 @@ async function handleRequest(prompt: string, apiKey: string) {
     temperature: 0.1,
     max_tokens: 1450,
   });
+
   let { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const textEncoder = new TextEncoder();
+
   // loop over the data as it is streamed from OpenAI and write it using our writeable
   (async () => {
-    for await (const chunk of stream) {
-      // every chunk has the following form:
-      /* chunk {
-        id: 'chatcmpl-8VuadGcFgVmrLSSBeIywZkM2n1zVm',
-        object: 'chat.completion.chunk',
-        created: 1702616391,
-        model: 'gpt-3.5-turbo-0613',
-        system_fingerprint: null,
-        choices: [ { index: 0, delta: { content: 'div }, finish_reason: null } ]
-      }*/
+    try {
+      for await (const chunk of stream) {
+        // every chunk has the following form:
+        /* chunk {
+          id: 'chatcmpl-8VuadGcFgVmrLSSBeIywZkM2n1zVm',
+          object: 'chat.completion.chunk',
+          created: 1702616391,
+          model: 'gpt-3.5-turbo-0613',
+          system_fingerprint: null,
+          choices: [ { index: 0, delta: { content: 'div }, finish_reason: null } ]
+        }*/
 
-      writer.write(textEncoder.encode(chunk.choices[0]?.delta?.content || ''));
+        writer
+          .write(textEncoder.encode(chunk.choices[0]?.delta?.content || ''))
+          .catch((error) => {
+            console.error('WRITE ERROR', error);
+          });
+      }
+    } catch (error) {
+      console.error('Stream reading error:', error);
+      writer.abort('Stream reading error');
     }
     writer.close();
   })();
 
-  return new Response(readable, { headers: { 'Content-Type': 'text/html' } });
+  return new Response(readable, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
 
 function getMessages(prompt: string): OpenAI.ChatCompletionMessageParam[] {

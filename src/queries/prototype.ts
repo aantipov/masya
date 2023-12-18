@@ -14,13 +14,20 @@ export function makePrototypeMutation() {
       setPrototypeStream: Setter<string>;
     }) => {
       setPrototypeStream('');
-      const response = await ky.post('/api/prototype', {
-        json: { prompt, aiKey },
-        timeout: false,
-      });
+      let response;
+      try {
+        response = await ky.post('/api/prototype', {
+          json: { prompt, aiKey },
+          timeout: false,
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        throw new Error('Error fetching');
+      }
       const reader = response.body!.getReader();
       const textDecoder = new TextDecoder();
       let result = '';
+      let tag = '';
       async function read() {
         let done = false;
         let value;
@@ -29,8 +36,12 @@ export function makePrototypeMutation() {
           try {
             ({ done, value } = await reader.read());
             if (!done) {
-              const chunk = textDecoder.decode(value);
-              result += chunk;
+              tag += textDecoder.decode(value);
+              // if tag is not complete, continue
+              if (!isValidHtmlString(tag)) continue;
+
+              result += tag;
+              tag = '';
               setPrototypeStream(result || '');
             }
           } catch (error) {
@@ -42,11 +53,20 @@ export function makePrototypeMutation() {
       }
 
       // Start reading the stream
-      await read();
+      try {
+        await read();
+      } catch (error) {
+        console.log('Stream reading error:', error);
+      }
 
       setPrototypeStream(result);
 
       return result;
     },
   }));
+}
+
+function isValidHtmlString(str: string) {
+  const regex = /<[^>]*$/;
+  return !regex.test(str);
 }

@@ -34,6 +34,13 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.tailwindcss.com"></script> 
+        <script>
+        document.querySelectorAll('a).forEach((el) => {
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+          });
+        });
+        </script>
       </head>
       <body>
         <div id="content"></div>

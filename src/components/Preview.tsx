@@ -9,6 +9,7 @@ import {
 import type { makePrototypeMutation } from '@/queries/prototype';
 import PreviewSourceCode from './PreviewSourceCode';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
+import getGroovy from '@/images/get-groovy.png';
 
 interface PreviewProps {
   prototypeM: ReturnType<typeof makePrototypeMutation>;
@@ -17,10 +18,23 @@ interface PreviewProps {
 
 export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
   const [showCode, setShowCode] = createSignal(false);
+  const [iframeHeight, setIframeHeight] = createSignal(0);
   let iframeRef: HTMLIFrameElement;
 
   createEffect(() => {
     iframeRef.contentWindow?.postMessage(prototypeStream(), '*');
+  });
+
+  createEffect(() => {
+    window.addEventListener(
+      'message',
+      (event) => {
+        if (event.data.height && event.data.type === 'iframe') {
+          setIframeHeight(event.data.height);
+        }
+      },
+      true,
+    );
   });
 
   const showIframe = () => {
@@ -34,20 +48,14 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.tailwindcss.com"></script> 
-        <script>
-        document.querySelectorAll('a).forEach((el) => {
-          el.addEventListener('click', (e) => {
-            e.preventDefault();
-          });
-        });
-        </script>
       </head>
       <body>
-        <div id="content"></div>
+        <div id="content" class="bg-gray-700 w-fit mx-auto pt-2"></div>
         <script>
           window.addEventListener('message', (event) => {
-            document.getElementById('content').innerHTML = event.data;
-          }, false);
+           document.getElementById('content').innerHTML = event.data;
+           window.parent.postMessage({height: document.documentElement.scrollHeight, type: 'iframe'}, '*');
+          });
         </script>
       </body>
     </html> 
@@ -80,7 +88,9 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
 
   return (
     <div class="h-full">
-      {actionsToolbar}
+      <Show when={!!prototypeM.data && !prototypeM.isPending}>
+        {actionsToolbar}
+      </Show>
 
       {/* Iframe with the generated UI */}
       <iframe
@@ -89,8 +99,8 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
         title="Preview"
         sandbox="allow-scripts"
         width="100%"
-        height="100%"
-        class={`h-full ${showIframe() ? '' : 'hidden'}`}
+        height={iframeHeight() | 150}
+        class={`${showIframe() ? '' : 'hidden'}`}
       />
 
       {/* Display Initial Fallback message or source code */}
@@ -112,11 +122,13 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
             </div>
           </Match>
           <Match when={!prototypeM.data && !prototypeM.isError}>
-            <div>
-              <h1 class="text-center text-2xl font-bold">Preview Section</h1>
-              <h2 class="mt-4 text-center text-xl font-bold">
-                of your prototype
-              </h2>
+            <div class="flex items-center justify-center">
+              <img
+                src={getGroovy.src}
+                alt="Let's get groovy!"
+                width={getGroovy.width}
+                height={getGroovy.height}
+              />
             </div>
           </Match>
         </Switch>

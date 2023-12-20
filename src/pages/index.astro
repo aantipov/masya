@@ -36,41 +36,7 @@ import App from '@/App.tsx';
         >.
       </div>
     </div>
-    <App client:load />
-    <script>
-      // Make the left and right panels resizable.
-      const divider = document.getElementById('divider') as HTMLDivElement;
-      const leftPanel = document.getElementById('leftPanel') as HTMLDivElement;
-      const rightPanel = document.getElementById(
-        'rightPanel',
-      ) as HTMLDivElement;
 
-      let mousedown = false;
-
-      divider.addEventListener('mousedown', function (e) {
-        mousedown = true;
-      });
-
-      window.addEventListener('mousemove', function (e) {
-        // We don't want to do anything if we aren't dragging.
-        if (!mousedown) {
-          return;
-        }
-
-        e.preventDefault();
-
-        const container = divider.parentNode as HTMLDivElement;
-        const containerWidth = container.clientWidth;
-        const leftPanelWidth = (e.clientX / containerWidth) * 100;
-        const rightPanelWidth = 100 - leftPanelWidth;
-
-        leftPanel.style.width = `${leftPanelWidth}%`;
-        rightPanel.style.width = `${rightPanelWidth}%`;
-      });
-
-      window.addEventListener('mouseup', function (e) {
-        mousedown = false;
-      });
-    </script>
+    <App client:only />
   </body>
 </html>

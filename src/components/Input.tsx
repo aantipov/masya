@@ -1,5 +1,5 @@
 import { makePrototypeMutation } from '@/queries/prototype';
-import { Show, createSignal, type Setter, type Accessor } from 'solid-js';
+import { Show, createSignal, type Setter, createEffect } from 'solid-js';
 
 interface InputProps {
   prototypeM: ReturnType<typeof makePrototypeMutation>;
@@ -19,8 +19,16 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
       prompt: prompt(),
       aiKey: aiKey(),
       setPrototypeStream,
+      prototype: prototypeM.data,
     });
   };
+  const hasUIGenerated = () => !!prototypeM.data;
+
+  createEffect(() => {
+    if (!prototypeM.isPending && prototypeM.isSuccess) {
+      setPrompt('');
+    }
+  });
 
   return (
     <div class="bg-gray-800 p-8">
@@ -28,8 +36,13 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
         id="input-form"
         onSubmit={handleSubmit}
         onKeyDown={(event) => {
-          if (event.metaKey && event.key === 'Enter') {
-            handleSubmit(event);
+          if (event.key === 'Enter') {
+            if (event.shiftKey) {
+              // new line
+            } else {
+              event.preventDefault();
+              handleSubmit(event);
+            }
           }
         }}
       >
@@ -46,14 +59,16 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
         />
         <textarea
           id="userInput"
-          class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"
-          placeholder="Describe your UI or changes..."
+          class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={prototypeM.isPending}
+          placeholder={
+            hasUIGenerated() ? 'Describe changes...' : 'Describe your UI...'
+          }
+          value={prompt()}
           onInput={(event) => {
             setPrompt(event.target.value);
           }}
-        >
-          {prompt()}
-        </textarea>
+        />
 
         <div class="flex justify-end">
           <Show when={!prototypeM.isPending}>

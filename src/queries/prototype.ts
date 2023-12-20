@@ -8,16 +8,18 @@ export function makePrototypeMutation() {
       prompt,
       aiKey,
       setPrototypeStream,
+      prototype,
     }: {
       prompt: string;
       aiKey: string;
       setPrototypeStream: Setter<string>;
+      prototype?: string;
     }) => {
       setPrototypeStream('');
       let response;
       try {
         response = await ky.post('/api/prototype', {
-          json: { prompt, aiKey },
+          json: { prompt, aiKey, prototype },
           timeout: false,
         });
       } catch (error) {

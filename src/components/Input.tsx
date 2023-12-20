@@ -8,6 +8,7 @@ interface InputProps {
 
 export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
   let openAiKey;
+  let userInputRef: HTMLTextAreaElement;
   if (typeof window !== 'undefined') {
     openAiKey = window.localStorage.getItem('openai-key');
   }
@@ -27,6 +28,7 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
   createEffect(() => {
     if (!prototypeM.isPending && prototypeM.isSuccess) {
       setPrompt('');
+      userInputRef.focus();
     }
   });
 
@@ -59,6 +61,7 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
         />
         <textarea
           id="userInput"
+          ref={(el) => (userInputRef = el)}
           class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
           disabled={prototypeM.isPending}
           placeholder={

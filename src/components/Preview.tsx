@@ -84,8 +84,7 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
 
       {/* Iframe with the generated UI */}
       <iframe
-        // @ts-ignore
-        ref={iframeRef}
+        ref={(el) => (iframeRef = el)}
         srcdoc={iframeHtml}
         title="Preview"
         sandbox="allow-scripts"

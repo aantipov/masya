@@ -2,6 +2,8 @@
 import App from '@/App.tsx';
 import { Image } from 'astro:assets';
 import masyaAlpha from '@/images/masya-alpha.png';
+import GithubIcon from '@/icons/Github.astro';
+import TwitterIcon from '@/icons/Twitter.astro';
 ---
 
 <html lang="en">
@@ -28,23 +30,29 @@ import masyaAlpha from '@/images/masya-alpha.png';
   <body
     class="min-w-[1024px] bg-gray-800 font-sans leading-normal tracking-normal text-gray-300"
   >
-    <div class="ml-2">
-      <div class="flex h-12 items-center">
+    <div class="mx-4">
+      <div class="flex h-12 items-center justify-between">
         <Image src={masyaAlpha} alt="Masya.dev" height={40} />
+        <div class="flex">
+          <a href="https://github.com/aantipov/masya">
+            <GithubIcon class="h-8 w-8" />
+          </a>
+          <a class="ml-2" href="https://twitter.com/_aantipov">
+            <TwitterIcon class="h-8 w-8" />
+          </a>
+        </div>
       </div>
     </div>
-    <!-- <div
-      class="absolute z-10 flex w-full items-center justify-center bg-orange-500 px-4 py-1 text-base font-semibold text-white"
-    >
-      <div>
-        The app is in the making. Follow the progress on{' '}
-        <a class="underline" href="https://twitter.com/_aantipov"> Twitter</a>
-         or <a class="underline" href="https://github.com/aantipov/masya"
-          >GitHub</a
-        >.
-      </div>
-    </div> -->
 
     <App client:only />
+
+    <footer class="bg-gray-900 py-4 text-center text-white">
+      <p>
+        Made with <span class="text-red-500">❤️</span> by <a
+          class="text-blue-400 hover:text-blue-300"
+          href="https://alexei.me/">Alexey Antipov</a
+        >
+      </p>
+    </footer>
   </body>
 </html>

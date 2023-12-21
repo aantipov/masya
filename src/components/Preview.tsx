@@ -8,6 +8,7 @@ import {
 } from 'solid-js';
 import type { makePrototypeMutation } from '@/queries/prototype';
 import PreviewSourceCode from './PreviewSourceCode';
+import EnterKey from '@/components/EnterKey';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
 import getGroovy from '@/images/get-groovy.png';
 
@@ -88,6 +89,8 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
 
   return (
     <div class="h-full">
+      <EnterKey />
+
       <Show when={!!prototypeM.data && !prototypeM.isPending}>
         {actionsToolbar}
       </Show>

@@ -17,8 +17,13 @@ export function makePrototypeMutation() {
     }) => {
       setPrototypeStream('');
       let response;
+      let url = '/api/prototype';
       try {
-        response = await ky.post('/api/prototype', {
+        console.log('env', process.env.NODE_ENV);
+        if (process.env.NODE_ENV === 'development') {
+          url = 'https://masya.dev/api/prototype';
+        }
+        response = await ky.post(url, {
           json: { prompt, aiKey, prototype },
           timeout: false,
         });

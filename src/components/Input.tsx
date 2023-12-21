@@ -7,18 +7,14 @@ interface InputProps {
 }
 
 export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
-  let openAiKey;
   let userInputRef: HTMLTextAreaElement;
-  if (typeof window !== 'undefined') {
-    openAiKey = window.localStorage.getItem('openai-key');
-  }
   const [prompt, setPrompt] = createSignal('');
-  const [aiKey, setAIKey] = createSignal(openAiKey || '');
   const handleSubmit = (e: Event) => {
     e.preventDefault();
+    const aiKey = window.sessionStorage.getItem('openai-key');
     prototypeM.mutate({
       prompt: prompt(),
-      aiKey: aiKey(),
+      aiKey: aiKey!,
       setPrototypeStream,
       prototype: prototypeM.data,
     });
@@ -48,17 +44,6 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
           }
         }}
       >
-        <input
-          type="password"
-          class="h-200px mb-2 w-full rounded border border-gray-600 bg-gray-900 p-2 text-white"
-          placeholder="OPENAI API KEY"
-          autocomplete="off"
-          name="openai-key"
-          id="openai-key"
-          onInput={(event) => {
-            setAIKey(event.target.value);
-          }}
-        />
         <textarea
           id="userInput"
           ref={(el) => (userInputRef = el)}

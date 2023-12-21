@@ -30,21 +30,23 @@ import TwitterIcon from '@/icons/Twitter.astro';
   <body
     class="min-w-[1024px] bg-gray-800 font-sans leading-normal tracking-normal text-gray-300"
   >
-    <div class="mx-4">
-      <div class="flex h-12 items-center justify-between">
-        <Image src={masyaAlpha} alt="Masya.dev" height={40} />
-        <div class="flex">
-          <a href="https://github.com/aantipov/masya">
-            <GithubIcon class="h-8 w-8" />
-          </a>
-          <a class="ml-2" href="https://twitter.com/_aantipov">
-            <TwitterIcon class="h-8 w-8" />
-          </a>
+    <div class="h-screen">
+      <div class="mx-4">
+        <div class="flex h-12 items-center justify-between">
+          <Image src={masyaAlpha} alt="Masya.dev" height={40} />
+          <div class="flex">
+            <a href="https://github.com/aantipov/masya">
+              <GithubIcon class="h-8 w-8" />
+            </a>
+            <a class="ml-2" href="https://twitter.com/_aantipov">
+              <TwitterIcon class="h-8 w-8" />
+            </a>
+          </div>
         </div>
       </div>
-    </div>
 
-    <App client:only />
+      <App client:only />
+    </div>
 
     <footer class="bg-gray-900 py-4 text-center text-white">
       <p>

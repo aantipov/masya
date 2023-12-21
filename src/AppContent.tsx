@@ -9,7 +9,7 @@ export default function AppContent() {
   const [prototypeStream, setPrototypeStream] = createSignal('');
 
   return (
-    <div class="flex h-screen flex-col overflow-hidden py-4">
+    <div class="flex flex-col overflow-hidden py-4">
       <section class="group/toolbar container relative mx-auto grow overflow-scroll rounded bg-gray-700 p-6 text-black">
         <Preview prototypeM={prototypeM} prototypeStream={prototypeStream} />
       </section>

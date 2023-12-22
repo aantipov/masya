@@ -1,7 +1,7 @@
 import { Show, createSignal, type Setter, createEffect } from 'solid-js';
 import Button from '@/atoms/Button';
 
-export default function EnterKey() {
+export default function EnterKeyModal() {
   let inputRef: HTMLInputElement;
   const [key, setKey] = createSignal(
     window.sessionStorage.getItem('openai-key'),
@@ -24,13 +24,10 @@ export default function EnterKey() {
   return (
     <Show when={key() === null}>
       {/* <!-- Modal Background --> */}
-      <div
-        class="fixed inset-0 h-full w-full overflow-y-auto bg-gray-800 bg-opacity-70"
-        id="my-modal"
-      ></div>
+      <div class="fixed inset-0 z-10 h-full w-full overflow-y-auto bg-gray-800 bg-opacity-70"></div>
 
       {/* <!-- Modal --> */}
-      <div class="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-gray-900 p-5 shadow-lg">
+      <div class="fixed left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 transform rounded-lg bg-gray-900 p-5 shadow-lg">
         <h2 class="mb-4 text-xl font-bold text-gray-100">
           OpenAI API Key Required
         </h2>

@@ -10,14 +10,20 @@ export default function AppContent() {
 
   return (
     <div class="flex flex-col overflow-hidden py-4">
-      <section class="group/toolbar container relative mx-auto grow overflow-scroll rounded bg-gray-700 p-6 text-black">
+      <section
+        style="height: calc(100vh - 200px)"
+        class="group/toolbar container relative mx-auto grow-0 overflow-scroll rounded bg-gray-700 p-6 text-black"
+      >
         <Preview prototypeM={prototypeM} prototypeStream={prototypeStream} />
       </section>
-      <div class="mx-auto max-w-3xl">
-        <Input
-          prototypeM={prototypeM}
-          setPrototypeStream={setPrototypeStream}
-        />
+
+      <div class="relative h-32">
+        <div class="absolute bottom-8 left-1/2 mx-auto max-w-3xl -translate-x-1/2 transform">
+          <Input
+            prototypeM={prototypeM}
+            setPrototypeStream={setPrototypeStream}
+          />
+        </div>
       </div>
     </div>
   );

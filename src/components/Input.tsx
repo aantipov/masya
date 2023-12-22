@@ -31,7 +31,7 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
   });
 
   return (
-    <div class="bg-gray-800 p-8">
+    <div>
       <form
         id="input-form"
         onSubmit={handleSubmit}
@@ -46,10 +46,10 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
           }
         }}
       >
-        <div class="relative flex min-w-[400px] items-center">
+        <div class="relative flex min-w-[500px] items-center">
           <textarea
             ref={(el) => (userInputRef = el)}
-            class="max-h-[120px] flex-1 resize-none overflow-y-scroll rounded bg-blue-700 bg-transparent bg-opacity-25 pb-3 pl-3 pr-12 pt-4 leading-tight text-gray-300 placeholder-gray-400 focus:outline-none"
+            class="max-h-[150px] flex-1 resize-none overflow-y-scroll rounded border border-gray-700 bg-gray-900 pb-3 pl-3 pr-12 pt-4 leading-tight text-gray-300 placeholder-gray-400 shadow-inner focus:outline-none"
             rows="1"
             aria-label="UI description"
             disabled={prototypeM.isPending}

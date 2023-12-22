@@ -1,5 +1,7 @@
 import { makePrototypeMutation } from '@/queries/prototype';
 import { Show, createSignal, type Setter, createEffect } from 'solid-js';
+import EnterKeyIcon from '@/icons/EnterKey';
+import LoadingIcon from '@/icons/Loading';
 
 interface InputProps {
   prototypeM: ReturnType<typeof makePrototypeMutation>;
@@ -44,39 +46,36 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
           }
         }}
       >
-        <textarea
-          id="userInput"
-          ref={(el) => (userInputRef = el)}
-          class="h-200px w-full rounded border border-gray-600 bg-gray-900 p-2 text-white disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={prototypeM.isPending}
-          placeholder={
-            hasUIGenerated() ? 'Describe changes...' : 'Describe your UI...'
-          }
-          value={prompt()}
-          onInput={(event) => {
-            setPrompt(event.target.value);
-          }}
-        />
-
-        <div class="flex justify-end">
-          <Show when={!prototypeM.isPending}>
-            <button
-              type="submit"
-              disabled={prototypeM.isPending}
-              class="mt-2 self-end rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-700"
-            >
-              Generate
-            </button>
-          </Show>
-          <Show when={prototypeM.isPending}>
-            <button
-              type="submit"
-              disabled
-              class="`mt-2 cursor-not-allowed self-end rounded bg-blue-300 px-4 py-2 text-white"
-            >
-              Generating...
-            </button>
-          </Show>
+        <div class="relative flex min-w-[400px] items-center">
+          <textarea
+            ref={(el) => (userInputRef = el)}
+            class="max-h-[120px] flex-1 resize-none overflow-y-scroll rounded bg-blue-700 bg-transparent bg-opacity-25 pb-3 pl-3 pr-12 pt-4 leading-tight text-gray-300 placeholder-gray-400 focus:outline-none"
+            rows="1"
+            aria-label="UI description"
+            disabled={prototypeM.isPending}
+            placeholder={
+              hasUIGenerated() ? 'Describe changes' : 'Describe your UI'
+            }
+            value={prompt()}
+            onInput={(event) => {
+              setPrompt(event.target.value);
+              event.target.style.height = 'auto';
+              event.target.style.height = event.target.scrollHeight + 'px';
+            }}
+          ></textarea>
+          <button
+            class="absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 border-purple-500 bg-purple-500 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out hover:border-purple-600 hover:bg-purple-600 focus:outline-none"
+            type="button"
+            id="generateButton"
+          >
+            <Show when={!prototypeM.isPending}>
+              <EnterKeyIcon class="h-4 w-4" />
+            </Show>
+            <Show when={prototypeM.isPending}>
+              <LoadingIcon class="h-4 w-4 animate-spin text-white" />
+            </Show>
+          </button>
+          <div class="absolute bottom-0 left-0 right-0 border-b-2 border-purple-400"></div>
         </div>
       </form>
     </div>

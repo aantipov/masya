@@ -23,7 +23,7 @@ const Button: Component<ButtonProps> = (props) => {
       <Show when={!!props.disabled}>
         <button
           type={props.type || 'button'}
-          class="w-full cursor-not-allowed rounded bg-gray-800 px-6 py-3 text-sm font-bold uppercase text-gray-400 shadow focus:outline-none disabled:shadow-none"
+          class="w-full cursor-not-allowed rounded bg-gray-700 px-6 py-3 text-sm font-bold uppercase text-gray-400 shadow focus:outline-none disabled:shadow-none"
           disabled
         >
           {props.children}

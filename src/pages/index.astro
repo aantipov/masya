@@ -4,6 +4,9 @@ import { Image } from 'astro:assets';
 import masyaAlpha from '@/images/masya-alpha.png';
 import GithubIcon from '@/icons/Github.astro';
 import TwitterIcon from '@/icons/Twitter.astro';
+import UserInfoIcon from '@/components/UserInfoIcon';
+const runtime = Astro.locals.runtime;
+const clerkPKey = runtime.env.CLERK_PUBLISHABLE_KEY;
 ---
 
 <html lang="en">
@@ -41,11 +44,14 @@ import TwitterIcon from '@/icons/Twitter.astro';
             <a class="ml-2" href="https://twitter.com/_aantipov">
               <TwitterIcon class="h-8 w-8" />
             </a>
+            <div class="ml-2">
+              <UserInfoIcon client:only />
+            </div>
           </div>
         </div>
       </div>
 
-      <App client:only />
+      <App client:only clerkPKey={clerkPKey} />
     </div>
 
     <footer class="bg-gray-900 py-4 text-center text-white">

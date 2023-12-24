@@ -19,7 +19,6 @@ export function makePrototypeMutation() {
       let response;
       let url = '/api/prototype';
       try {
-        console.log('env', process.env.NODE_ENV);
         if (process.env.NODE_ENV === 'development') {
           url = 'https://masya.dev/api/prototype';
         }

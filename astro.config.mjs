@@ -7,6 +7,11 @@ import solidJs from '@astrojs/solid-js';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare({
+    runtime: {
+      mode: 'local',
+      type: 'pages',
+      bindings: {},
+    },
     mode: 'directory',
     routes: {
       strategy: 'include',

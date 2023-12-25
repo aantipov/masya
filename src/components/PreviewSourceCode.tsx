@@ -8,10 +8,10 @@ import { usePrototypeM } from '@/sharedState';
 
 export default function Preview() {
   hljs.registerLanguage('javascript', hlHtml);
-  const [getPrototypeM] = usePrototypeM();
+  const { prototypeM } = usePrototypeM();
 
   const [prettiedHtml] = createResource(
-    () => getPrototypeM()!.data,
+    () => prototypeM.data,
     async (val) => {
       const res = await getPrettiedCode(val);
       return res;

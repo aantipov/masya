@@ -8,11 +8,11 @@ export default function AuthModal() {
   const { getClerk, getClerkLoaded } = useClerk();
   const [userAPIKey, setUserAPIKey] = useUserAPIKey();
   const [inputKey, setInputKey] = createSignal(userAPIKey());
+  const [getIsExplainerOpen, setIsExplainerOpen] = createSignal(false);
   const handleSubmit = (e: Event) => {
     e.preventDefault();
     setUserAPIKey(inputKey());
   };
-  const [getIsExplainerOpen, setIsExplainerOpen] = createSignal(false);
 
   function isInputKeyValid() {
     const val = inputKey();

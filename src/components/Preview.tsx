@@ -2,16 +2,19 @@ import { Match, Show, Switch, createSignal, createEffect } from 'solid-js';
 import PreviewSourceCode from './PreviewSourceCode';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
 import getGroovy from '@/images/get-groovy.png';
-import { getPrototypeStream, usePrototypeM } from '@/sharedState';
+import { usePrototypeM } from '@/sharedState';
 
 export default function Preview() {
   const [showCode, setShowCode] = createSignal(false);
   const [iframeHeight, setIframeHeight] = createSignal(0);
-  const [getPrototypeM] = usePrototypeM();
+  const { prototypeM, getPrototypeStream, lastPrototype } = usePrototypeM();
   let iframeRef: HTMLIFrameElement;
 
   createEffect(() => {
-    iframeRef.contentWindow?.postMessage(getPrototypeStream(), '*');
+    iframeRef.contentWindow?.postMessage(
+      lastPrototype() || getPrototypeStream(),
+      '*',
+    );
   });
 
   createEffect(() => {
@@ -27,12 +30,7 @@ export default function Preview() {
   });
 
   const showIframe = () => {
-    const prototypeM = getPrototypeM()!;
-    return (
-      (getPrototypeStream() || prototypeM.data) &&
-      !prototypeM.isError &&
-      !showCode()
-    );
+    return (lastPrototype() || getPrototypeStream()) && !showCode();
   };
 
   const iframeHtml = `
@@ -56,7 +54,6 @@ export default function Preview() {
   `;
 
   const getActionsToolbar = () => {
-    const prototypeM = getPrototypeM()!;
     return (
       <div class="absolute right-0 top-0 z-10 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
         {/* Copy to clipboard */}
@@ -83,9 +80,9 @@ export default function Preview() {
     );
   };
 
-  const getData = () => getPrototypeM()!.data;
-  const getIsPending = () => getPrototypeM()!.isPending;
-  const getIsError = () => getPrototypeM()!.isError;
+  const getData = () => prototypeM.data;
+  const getIsPending = () => prototypeM.isPending;
+  const getIsError = () => prototypeM.isError;
 
   return (
     <div class="h-full">
@@ -116,7 +113,7 @@ export default function Preview() {
                 Please try again
               </h2>
               <div>
-                <pre>{JSON.stringify(getPrototypeM()!.error, null, 2)}</pre>
+                <pre>{JSON.stringify(prototypeM.error, null, 2)}</pre>
               </div>
             </div>
           </Match>

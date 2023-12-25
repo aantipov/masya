@@ -2,17 +2,18 @@ import { createMutation } from '@tanstack/solid-query';
 import ky from 'ky';
 import type { Setter } from 'solid-js';
 
-export function makePrototypeMutation() {
+export function makePrototypeMutation(
+  setLastPrototype: Setter<string>,
+  setPrototypeStream: Setter<string>,
+) {
   return createMutation(() => ({
     mutationFn: async ({
       prompt,
       aiKey,
-      setPrototypeStream,
       prototype,
     }: {
       prompt: string;
       aiKey: string;
-      setPrototypeStream: Setter<string>;
       prototype?: string;
     }) => {
       setPrototypeStream('');
@@ -66,6 +67,7 @@ export function makePrototypeMutation() {
       }
 
       setPrototypeStream(result);
+      setLastPrototype(result);
 
       return result;
     },

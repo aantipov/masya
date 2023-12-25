@@ -45,15 +45,12 @@ export function useUserAPIKey() {
   return [_getUserAPIKey, setUserAPIKey] as const;
 }
 
-export const [getPrototypeStream, setPrototypeStream] = createSignal('');
-
-const [getPrototypeM, setPrototypeM] =
-  createSignal<ReturnType<typeof makePrototypeMutation>>();
-let prototypeMInitialized = false;
+const [getPrototypeStream, setPrototypeStream] = createSignal<string>('');
+const [lastPrototype, setLastPrototype] = createSignal<string>('');
+let prototypeM: ReturnType<typeof makePrototypeMutation>;
 export function usePrototypeM() {
-  if (!prototypeMInitialized) {
-    setPrototypeM(makePrototypeMutation());
-    prototypeMInitialized = true;
+  if (!prototypeM) {
+    prototypeM = makePrototypeMutation(setLastPrototype, setPrototypeStream);
   }
-  return [getPrototypeM] as const;
+  return { prototypeM, lastPrototype, getPrototypeStream } as const;
 }

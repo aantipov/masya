@@ -1,23 +1,18 @@
-import { makePrototypeMutation } from '@/queries/prototype';
-import { Show, createSignal, type Setter, createEffect } from 'solid-js';
+import { Show, createSignal, createEffect } from 'solid-js';
 import EnterKeyIcon from '@/icons/EnterKey';
 import LoadingIcon from '@/icons/Loading';
+import { usePrototypeM } from '@/sharedState';
 
-interface InputProps {
-  prototypeM: ReturnType<typeof makePrototypeMutation>;
-  setPrototypeStream: Setter<string>;
-}
-
-export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
+export default function Input() {
   let userInputRef: HTMLTextAreaElement;
   const [prompt, setPrompt] = createSignal('');
+  const { prototypeM } = usePrototypeM();
   const handleSubmit = (e: Event) => {
     e.preventDefault();
     const aiKey = window.sessionStorage.getItem('openai-key');
     prototypeM.mutate({
       prompt: prompt(),
       aiKey: aiKey!,
-      setPrototypeStream,
       prototype: prototypeM.data,
     });
   };
@@ -65,7 +60,7 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
           ></textarea>
           <button
             class="absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 border-purple-500 bg-purple-500 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out hover:border-purple-600 hover:bg-purple-600 focus:outline-none"
-            type="submit"
+            type={prototypeM.isPending ? 'button' : 'submit'}
           >
             <Show when={!prototypeM.isPending}>
               <EnterKeyIcon class="h-4 w-4" />

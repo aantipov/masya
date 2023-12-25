@@ -4,17 +4,14 @@ import hljs from 'highlight.js/lib/core';
 import hlHtml from 'highlight.js/lib/languages/xml';
 import 'highlight.js/styles/github.css';
 import 'highlight.js/styles/atom-one-dark.css';
-import type { makePrototypeMutation } from '@/queries/prototype';
+import { usePrototypeM } from '@/sharedState';
 
-interface PreviewSourceCodeProps {
-  prototypeM: ReturnType<typeof makePrototypeMutation>;
-}
-
-export default function Preview({ prototypeM }: PreviewSourceCodeProps) {
+export default function Preview() {
   hljs.registerLanguage('javascript', hlHtml);
+  const [getPrototypeM] = usePrototypeM();
 
   const [prettiedHtml] = createResource(
-    () => prototypeM.data,
+    () => getPrototypeM()!.data,
     async (val) => {
       const res = await getPrettiedCode(val);
       return res;

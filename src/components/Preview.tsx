@@ -1,29 +1,17 @@
-import {
-  Match,
-  Show,
-  Switch,
-  createSignal,
-  type Accessor,
-  createEffect,
-} from 'solid-js';
-import type { makePrototypeMutation } from '@/queries/prototype';
+import { Match, Show, Switch, createSignal, createEffect } from 'solid-js';
 import PreviewSourceCode from './PreviewSourceCode';
-import AuthModal from '@/components/AuthModal';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
 import getGroovy from '@/images/get-groovy.png';
+import { getPrototypeStream, usePrototypeM } from '@/sharedState';
 
-interface PreviewProps {
-  prototypeM: ReturnType<typeof makePrototypeMutation>;
-  prototypeStream: Accessor<string>;
-}
-
-export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
+export default function Preview() {
   const [showCode, setShowCode] = createSignal(false);
   const [iframeHeight, setIframeHeight] = createSignal(0);
+  const [getPrototypeM] = usePrototypeM();
   let iframeRef: HTMLIFrameElement;
 
   createEffect(() => {
-    iframeRef.contentWindow?.postMessage(prototypeStream(), '*');
+    iframeRef.contentWindow?.postMessage(getPrototypeStream(), '*');
   });
 
   createEffect(() => {
@@ -39,7 +27,12 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
   });
 
   const showIframe = () => {
-    return prototypeStream() && !prototypeM.isError && !showCode();
+    const prototypeM = getPrototypeM()!;
+    return (
+      (getPrototypeStream() || prototypeM.data) &&
+      !prototypeM.isError &&
+      !showCode()
+    );
   };
 
   const iframeHtml = `
@@ -62,38 +55,41 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
     </html> 
   `;
 
-  const actionsToolbar = (
-    <div class="absolute right-0 top-0 z-10 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
-      {/* Copy to clipboard */}
-      <button
-        class="mr-2 rounded bg-white p-1 text-sm text-black"
-        onClick={async () => {
-          const prettiedHtml = prototypeM.data
-            ? await getPrettiedCode(prototypeM.data)
-            : '';
-          navigator.clipboard.writeText(prettiedHtml);
-        }}
-      >
-        Copy
-      </button>
+  const getActionsToolbar = () => {
+    const prototypeM = getPrototypeM()!;
+    return (
+      <div class="absolute right-0 top-0 z-10 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
+        {/* Copy to clipboard */}
+        <button
+          class="mr-2 rounded bg-white p-1 text-sm text-black"
+          onClick={async () => {
+            const prettiedHtml = prototypeM.data
+              ? await getPrettiedCode(prototypeM.data)
+              : '';
+            navigator.clipboard.writeText(prettiedHtml);
+          }}
+        >
+          Copy
+        </button>
 
-      {/* Show source code */}
-      <button
-        class="rounded bg-white p-1 text-sm text-black"
-        onClick={() => setShowCode(!showCode())}
-      >
-        {'</>'}
-      </button>
-    </div>
-  );
+        {/* Show source code */}
+        <button
+          class="rounded bg-white p-1 text-sm text-black"
+          onClick={() => setShowCode(!showCode())}
+        >
+          {'</>'}
+        </button>
+      </div>
+    );
+  };
+
+  const getData = () => getPrototypeM()!.data;
+  const getIsPending = () => getPrototypeM()!.isPending;
+  const getIsError = () => getPrototypeM()!.isError;
 
   return (
     <div class="h-full">
-      <AuthModal />
-
-      <Show when={!!prototypeM.data && !prototypeM.isPending}>
-        {actionsToolbar}
-      </Show>
+      <Show when={!!getData() && !getIsPending()}>{getActionsToolbar()}</Show>
 
       {/* Iframe with the generated UI */}
       <iframe
@@ -110,21 +106,21 @@ export default function Preview({ prototypeM, prototypeStream }: PreviewProps) {
       <Show when={!showIframe()}>
         <Switch>
           <Match when={showCode()}>
-            <PreviewSourceCode prototypeM={prototypeM} />
+            <PreviewSourceCode />
           </Match>
 
-          <Match when={!prototypeM.data && prototypeM.isError}>
+          <Match when={!getData() && getIsError()}>
             <div>
               <h1 class="text-center text-2xl font-bold text-red-500">Error</h1>
               <h2 class="mt-4 text-center text-xl font-bold">
                 Please try again
               </h2>
               <div>
-                <pre>{JSON.stringify(prototypeM.error, null, 2)}</pre>
+                <pre>{JSON.stringify(getPrototypeM()!.error, null, 2)}</pre>
               </div>
             </div>
           </Match>
-          <Match when={!prototypeM.data && !prototypeM.isError}>
+          <Match when={!getData() && !getIsError()}>
             <div class="flex items-center justify-center">
               <img
                 src={getGroovy.src}

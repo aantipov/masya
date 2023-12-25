@@ -1,13 +1,13 @@
-import { getClerk, getClerkLoaded } from '@/sharedState';
+import { useClerk } from '@/sharedState';
 import { createEffect } from 'solid-js';
 
 export default function UserInfoIcon() {
   let userIconRef: HTMLDivElement;
+  const { getClerk, getClerkLoaded } = useClerk();
 
   createEffect(() => {
     const clerk = getClerk();
-    const isClerkLoaded = getClerkLoaded();
-    if (isClerkLoaded && clerk?.user) {
+    if (getClerkLoaded() && clerk?.user) {
       clerk.mountUserButton(userIconRef);
     }
   });

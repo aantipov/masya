@@ -1,18 +1,16 @@
 import { Show, createSignal, type Setter, createEffect } from 'solid-js';
 import Button from '@/atoms/Button';
-import { getClerk, getClerkLoaded } from '@/sharedState';
+import { useClerk, useUserAPIKey } from '@/sharedState';
 
 export default function AuthModal() {
   let inputRef: HTMLInputElement;
   let clerkSignInRef: HTMLDivElement;
-  const [key, setKey] = createSignal(
-    window.sessionStorage.getItem('openai-key'),
-  );
-  const [inputKey, setInputKey] = createSignal(key());
+  const { getClerk, getClerkLoaded } = useClerk();
+  const [userAPIKey, setUserAPIKey] = useUserAPIKey();
+  const [inputKey, setInputKey] = createSignal(userAPIKey());
   const handleSubmit = (e: Event) => {
     e.preventDefault();
-    setKey(inputKey());
-    window.sessionStorage.setItem('openai-key', inputKey()!);
+    setUserAPIKey(inputKey());
   };
   const [getIsExplainerOpen, setIsExplainerOpen] = createSignal(false);
 
@@ -20,9 +18,6 @@ export default function AuthModal() {
     const val = inputKey();
     return val !== null && val.length > 30;
   }
-
-  const showModal = () =>
-    key() === null && getClerkLoaded() && !getClerk()!.user;
 
   createEffect(() => {
     const clerk = getClerk();
@@ -36,7 +31,7 @@ export default function AuthModal() {
     inputRef && inputRef.focus();
   });
   return (
-    <Show when={showModal()}>
+    <div>
       {/* <!-- Modal Background --> */}
       <div class="fixed inset-0 z-10 h-full w-full overflow-y-auto bg-gray-800 bg-opacity-70"></div>
 
@@ -133,6 +128,6 @@ export default function AuthModal() {
           </div>
         </div>
       </div>
-    </Show>
+    </div>
   );
 }

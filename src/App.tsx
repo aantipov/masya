@@ -1,10 +1,8 @@
 import 'solid-devtools/setup';
 import { QueryClient, QueryClientProvider } from '@tanstack/solid-query';
-import { setClerk, getClerkLoaded, setClerkLoaded } from '@/sharedState';
-import Clerk from '@clerk/clerk-js';
-import { shadesOfPurple } from '@clerk/themes';
+import { useClerk } from '@/sharedState';
 import AppContent from './AppContent';
-import { Show, createEffect } from 'solid-js';
+import { Show } from 'solid-js';
 
 const queryClient = new QueryClient();
 
@@ -14,24 +12,7 @@ interface AppProps {
 
 export default function App({ clerkPKey }: AppProps) {
   // Init Shared State with Clerk instance
-  createEffect(() => {
-    const clerkInstance = new Clerk(clerkPKey);
-    setClerk(clerkInstance);
-    async function loadClerk() {
-      await clerkInstance.load({
-        appearance: {
-          baseTheme: shadesOfPurple,
-          layout: {
-            showOptionalFields: true,
-            socialButtonsPlacement: 'bottom',
-            socialButtonsVariant: 'iconButton',
-          },
-        },
-      });
-      setClerkLoaded(true);
-    }
-    loadClerk();
-  });
+  const { getClerkLoaded } = useClerk(clerkPKey);
 
   return (
     <QueryClientProvider client={queryClient}>

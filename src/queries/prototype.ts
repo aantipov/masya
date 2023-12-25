@@ -1,4 +1,4 @@
-import { createMutation, useQueryClient } from '@tanstack/solid-query';
+import { createMutation } from '@tanstack/solid-query';
 import ky from 'ky';
 import type { Setter } from 'solid-js';
 

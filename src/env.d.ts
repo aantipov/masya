@@ -5,6 +5,7 @@ type Runtime = import('@astrojs/cloudflare').DirectoryRuntime<ENV>;
 type ENV = {
   CLERK_PUBLISHABLE_KEY: string;
   CLERK_SECRET_KEY: string;
+  OPENAI_API_KEY: string;
 };
 
 declare namespace App {

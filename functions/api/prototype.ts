@@ -1,4 +1,6 @@
 import OpenAI from 'openai';
+import { parse } from 'cookie';
+import { verifyToken } from '@clerk/backend';
 
 export const onRequestOptions: PagesFunction = async ({ request }) => {
   return new Response(null, {
@@ -10,12 +12,23 @@ export const onRequestOptions: PagesFunction = async ({ request }) => {
   });
 };
 
-export const onRequestPost: PagesFunction = async ({ request }) => {
+export const onRequestPost: PagesFunction<CFEnvT> = async ({
+  request,
+  env,
+}) => {
   // @ts-ignore
-  const { prompt, aiKey: apiKey, prototype } = await request.json();
+  const { prompt, aiKey: userApiKey, prototype } = await request.json();
 
-  if (!apiKey || !prompt) {
+  if (!prompt) {
     return new Response('Invalid request', { status: 400 });
+  }
+
+  let apiKey;
+  try {
+    apiKey = await getApiKey(userApiKey, request, env);
+  } catch (error) {
+    console.log('Error:', error);
+    return new Response('Invalid API key', { status: 401 });
   }
 
   try {
@@ -25,6 +38,38 @@ export const onRequestPost: PagesFunction = async ({ request }) => {
     return new Response('Internal server error', { status: 500 });
   }
 };
+
+async function getApiKey(
+  userApiKey: string,
+  request: Request,
+  env: CFEnvT,
+): Promise<string> {
+  const TOKEN_COOKIE_NAME = '__session';
+  const cookie = parse(request.headers.get('Cookie') || '');
+  const jwtToken = cookie[TOKEN_COOKIE_NAME];
+
+  if (!userApiKey && !jwtToken) {
+    throw new Error('No API key');
+  }
+
+  if (userApiKey) {
+    return userApiKey;
+  }
+
+  // Verify jwt token
+  let res;
+  try {
+    res = await verifyToken(jwtToken!, {
+      issuer: null,
+      secretKey: env.CLERK_SECRET_KEY,
+    });
+    console.log('res2', res);
+  } catch (error) {
+    throw new Error('Error verifying token');
+  }
+
+  return env.OPENAI_API_KEY;
+}
 
 async function handleRequest(
   prompt: string,

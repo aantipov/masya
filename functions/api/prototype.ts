@@ -63,7 +63,6 @@ async function getApiKey(
       issuer: null,
       secretKey: env.CLERK_SECRET_KEY,
     });
-    console.log('res2', res);
   } catch (error) {
     throw new Error('Error verifying token');
   }

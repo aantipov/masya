@@ -2,7 +2,7 @@ import { Show, createSignal, type Setter, createEffect } from 'solid-js';
 import Button from '@/atoms/Button';
 import { getClerk, getClerkLoaded } from '@/sharedState';
 
-export default function EnterKeyModal() {
+export default function AuthModal() {
   let inputRef: HTMLInputElement;
   let clerkSignInRef: HTMLDivElement;
   const [key, setKey] = createSignal(
@@ -22,13 +22,13 @@ export default function EnterKeyModal() {
   }
 
   const showModal = () =>
-    key() === null && getClerkLoaded() && !getClerk().user;
+    key() === null && getClerkLoaded() && !getClerk()!.user;
 
   createEffect(() => {
     const clerk = getClerk();
     const isClerkLoaded = getClerkLoaded();
-    if (isClerkLoaded && !clerk.user) {
-      clerk.mountSignIn(clerkSignInRef);
+    if (isClerkLoaded && !clerk!.user) {
+      clerk!.mountSignIn(clerkSignInRef);
     }
   });
 

@@ -65,8 +65,7 @@ export default function Input({ prototypeM, setPrototypeStream }: InputProps) {
           ></textarea>
           <button
             class="absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 border-purple-500 bg-purple-500 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out hover:border-purple-600 hover:bg-purple-600 focus:outline-none"
-            type="button"
-            id="generateButton"
+            type="submit"
           >
             <Show when={!prototypeM.isPending}>
               <EnterKeyIcon class="h-4 w-4" />

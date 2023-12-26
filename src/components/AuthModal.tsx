@@ -1,4 +1,4 @@
-import { Show, createSignal, type Setter, createEffect } from 'solid-js';
+import { createSignal, createEffect } from 'solid-js';
 import Button from '@/atoms/Button';
 import { useClerk, useUserAPIKey } from '@/sharedState';
 

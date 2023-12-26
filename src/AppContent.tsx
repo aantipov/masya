@@ -4,6 +4,7 @@ import Preview from './components/Preview';
 import { useClerk, useUserAPIKey } from '@/sharedState';
 import { Show } from 'solid-js';
 import AuthModal from './components/AuthModal';
+import Notify from './components/Notify';
 
 export default function AppContent() {
   const { getClerk } = useClerk();
@@ -14,6 +15,8 @@ export default function AppContent() {
 
   return (
     <div>
+      <Notify />
+
       <Show when={showAuthModal()}>
         <AuthModal />
       </Show>

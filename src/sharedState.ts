@@ -54,3 +54,6 @@ export function usePrototypeM() {
   }
   return { prototypeM, lastPrototype, getPrototypeStream } as const;
 }
+
+// Global Notification
+export const [notify, setNotify] = createSignal({ text: '' });

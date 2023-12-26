@@ -11,6 +11,8 @@ import getPrettiedCode from '@/helpers/getPrettiedCode';
 import getGroovy from '@/images/get-groovy.png';
 import { usePrototypeM } from '@/sharedState';
 import LoadingIcon from '@/icons/Loading';
+import ActionsToolbar from '@/components/ActionsToolbar';
+import { setNotify } from '@/sharedState';
 
 export default function Preview() {
   const [showCode, setShowCode] = createSignal(false);
@@ -83,40 +85,25 @@ export default function Preview() {
     </html> 
   `;
 
-  const getActionsToolbar = () => {
-    return (
-      <div class="absolute right-0 top-0 z-10 mr-2 mt-2 rounded bg-black bg-opacity-50 p-2 text-white opacity-0 transition-opacity group-hover/toolbar:opacity-100">
-        {/* Copy to clipboard */}
-        <button
-          class="mr-2 rounded bg-white p-1 text-sm text-black"
-          onClick={async () => {
-            const prettiedHtml = prototypeM.data
-              ? await getPrettiedCode(prototypeM.data)
-              : '';
-            navigator.clipboard.writeText(prettiedHtml);
-          }}
-        >
-          Copy
-        </button>
-
-        {/* Show source code */}
-        <button
-          class="rounded bg-white p-1 text-sm text-black"
-          onClick={() => setShowCode(!showCode())}
-        >
-          {'</>'}
-        </button>
-      </div>
-    );
-  };
-
   const getData = () => prototypeM.data;
   const getIsPending = () => prototypeM.isPending;
   const getIsError = () => prototypeM.isError;
+  async function onCopy() {
+    const prettiedHtml = prototypeM.data
+      ? await getPrettiedCode(prototypeM.data)
+      : '';
+    navigator.clipboard.writeText(prettiedHtml);
+    setNotify({ text: 'Copied to clipboard' });
+  }
 
   return (
     <div class="h-full">
-      <Show when={!!getData() && !getIsPending()}>{getActionsToolbar()}</Show>
+      <Show when={!!getData() && !getIsPending()}>
+        <ActionsToolbar
+          onCode={() => setShowCode(!showCode())}
+          onCopy={onCopy}
+        />
+      </Show>
       <Show when={prototypeM.isPending && !!getPrototypeStream()}>
         <div class="absolute left-6 top-6">
           <LoadingIcon class="h-8 w-8 animate-spin text-white" />

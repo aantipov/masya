@@ -1,20 +1,46 @@
-import { Match, Show, Switch, createSignal, createEffect } from 'solid-js';
+import {
+  Match,
+  Show,
+  Switch,
+  createSignal,
+  createEffect,
+  onCleanup,
+} from 'solid-js';
 import PreviewSourceCode from './PreviewSourceCode';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
 import getGroovy from '@/images/get-groovy.png';
 import { usePrototypeM } from '@/sharedState';
+import LoadingIcon from '@/icons/Loading';
 
 export default function Preview() {
   const [showCode, setShowCode] = createSignal(false);
   const [iframeHeight, setIframeHeight] = createSignal(0);
   const { prototypeM, getPrototypeStream, lastPrototype } = usePrototypeM();
+  const [showLastUI, setShowLastUI] = createSignal(true);
   let iframeRef: HTMLIFrameElement;
 
+  // Show last generated prototype when pending until
+  // - either new prototype is generated. Then show the new prototype
+  // - timeout of 5 seconds. Then show the stream
   createEffect(() => {
-    iframeRef.contentWindow?.postMessage(
-      lastPrototype() || getPrototypeStream(),
-      '*',
-    );
+    let timeoutId: any;
+    if (prototypeM.isPending) {
+      setShowLastUI(true);
+      timeoutId = setTimeout(() => {
+        setShowLastUI(false);
+      }, 4000);
+    } else {
+      clearTimeout(timeoutId);
+    }
+    onCleanup(() => {
+      clearTimeout(timeoutId);
+    });
+  });
+
+  createEffect(() => {
+    const data =
+      showLastUI() && lastPrototype() ? lastPrototype() : getPrototypeStream();
+    iframeRef.contentWindow?.postMessage(data, '*');
   });
 
   createEffect(() => {
@@ -30,7 +56,11 @@ export default function Preview() {
   });
 
   const showIframe = () => {
-    return (lastPrototype() || getPrototypeStream()) && !showCode();
+    return (
+      (lastPrototype() || getPrototypeStream()) &&
+      !prototypeM.isError &&
+      !showCode()
+    );
   };
 
   const iframeHtml = `
@@ -87,6 +117,11 @@ export default function Preview() {
   return (
     <div class="h-full">
       <Show when={!!getData() && !getIsPending()}>{getActionsToolbar()}</Show>
+      <Show when={prototypeM.isPending && !!getPrototypeStream()}>
+        <div class="absolute left-6 top-6">
+          <LoadingIcon class="h-8 w-8 animate-spin text-white" />
+        </div>
+      </Show>
 
       {/* Iframe with the generated UI */}
       <iframe

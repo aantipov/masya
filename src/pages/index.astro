@@ -1,12 +1,18 @@
 ---
-import App from '@/App.tsx';
 import { Image } from 'astro:assets';
+import LogoImage from '@/images/logo.png';
+import App from '@/App.tsx';
 import masyaAlpha from '@/images/masya-alpha.png';
 import GithubIcon from '@/icons/Github.astro';
 import TwitterIcon from '@/icons/Twitter.astro';
 import UserInfoIcon from '@/components/UserInfoIcon';
 const runtime = Astro.locals.runtime;
 const clerkPKey = runtime.env.CLERK_PUBLISHABLE_KEY;
+const imageUrl = new URL(LogoImage.src, Astro.url.origin);
+const canonicalURL = Astro.site;
+const ogTitle = 'Masya - Transforming UI Prototyping with AI Tech';
+const ogDesc =
+  'Transform your UI design workflow with Masya. Leverage the power of AI to create responsive HTML interfaces and Tailwind CSS designs quickly and efficiently.';
 ---
 
 <html lang="en">
@@ -20,17 +26,33 @@ const clerkPKey = runtime.env.CLERK_PUBLISHABLE_KEY;
       name="description"
       content="Transform your UI design workflow with Masya. Leverage the power of AI to create responsive HTML interfaces and Tailwind CSS designs quickly and efficiently."
     />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={ogTitle} />
+    <meta property="og:description" content={ogDesc} />
+    <meta property="og:image" content={imageUrl} />
+
+    <!-- Twitter -->
+    <meta name="twitter:creator" content="@_aantipov" />
+    <meta property="twitter:card" content="summary" />
+    <meta property="twitter:title" content={ogTitle} />
+    <meta property="twitter:description" content={ogDesc} />
+    <meta property="twitter:image" content={imageUrl} />
+
+    <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
     <link rel="manifest" href="/site.webmanifest" />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/split.js/1.6.0/split.min.js"
-    ></script>
+
+    <!-- Analytics -->
     <script
       defer
       data-domain="masya.dev"
       src="https://plausible.io/js/script.js"></script>
+
     <style is:global>
       #input-form [data-lastpass-icon-root],
       #openai-key-form [data-lastpass-icon-root] {

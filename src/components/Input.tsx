@@ -1,15 +1,17 @@
 import { Show, createSignal, createEffect } from 'solid-js';
 import EnterKeyIcon from '@/icons/EnterKey';
 import LoadingIcon from '@/icons/Loading';
-import { usePrototypeM } from '@/sharedState';
+import { usePrototypeM, useMessages } from '@/sharedState';
 
 export default function Input() {
   let userInputRef: HTMLTextAreaElement;
   const [prompt, setPrompt] = createSignal('');
   const { prototypeM } = usePrototypeM();
+  const { addPrompt } = useMessages();
   const handleSubmit = (e: Event) => {
     e.preventDefault();
     const aiKey = window.sessionStorage.getItem('openai-key');
+    addPrompt(prompt());
     prototypeM.mutate({
       prompt: prompt(),
       aiKey: aiKey!,
@@ -19,7 +21,7 @@ export default function Input() {
   const hasUIGenerated = () => !!prototypeM.data;
 
   createEffect(() => {
-    if (!prototypeM.isPending && prototypeM.isSuccess) {
+    if (!prototypeM.isPending) {
       setPrompt('');
       userInputRef.focus();
     }

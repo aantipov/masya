@@ -1,56 +1,47 @@
-import {
-  Match,
-  Show,
-  Switch,
-  createSignal,
-  createEffect,
-  onCleanup,
-} from 'solid-js';
+import { Show, createSignal, createEffect, onMount } from 'solid-js';
 import PreviewSourceCode from './PreviewSourceCode';
 import getPrettiedCode from '@/helpers/getPrettiedCode';
-import getGroovy from '@/images/get-groovy.png';
-import { usePrototypeM } from '@/sharedState';
+import { usePrototypeM, type MessageT } from '@/sharedState';
 import LoadingIcon from '@/icons/Loading';
 import ActionsToolbar from '@/components/ActionsToolbar';
 import { setNotify } from '@/sharedState';
 
-export default function Preview() {
+interface PropsT {
+  message: MessageT;
+}
+
+export default function Preview({ message }: PropsT) {
   const [showCode, setShowCode] = createSignal(false);
-  const [iframeHeight, setIframeHeight] = createSignal(0);
-  const { prototypeM, getPrototypeStream, lastPrototype } = usePrototypeM();
-  const [showLastUI, setShowLastUI] = createSignal(true);
+  const [iframeHeight, setIframeHeight] = createSignal(150);
+  const { prototypeM } = usePrototypeM();
   let iframeRef: HTMLIFrameElement;
 
-  // Show last generated prototype when pending until
-  // - either new prototype is generated. Then show the new prototype
-  // - timeout of 5 seconds. Then show the stream
   createEffect(() => {
-    let timeoutId: any;
-    if (prototypeM.isPending) {
-      setShowLastUI(true);
-      timeoutId = setTimeout(() => {
-        setShowLastUI(false);
-      }, 4000);
-    } else {
-      clearTimeout(timeoutId);
+    iframeRef.contentWindow?.postMessage(
+      {
+        response: message.response,
+        isFinished: message.isFinished,
+      },
+      '*',
+    );
+  });
+
+  function adjustIframeHeight(event: MessageEvent<any>) {
+    if (event.data.height && event.data.type === 'iframe') {
+      setIframeHeight(event.data.height);
     }
-    onCleanup(() => {
-      clearTimeout(timeoutId);
-    });
+  }
+
+  onMount(() => {
+    window.addEventListener('message', adjustIframeHeight, true);
   });
 
-  createEffect(() => {
-    const data =
-      showLastUI() && lastPrototype() ? lastPrototype() : getPrototypeStream();
-    iframeRef.contentWindow?.postMessage(data, '*');
-  });
-
-  createEffect(() => {
+  onMount(() => {
     window.addEventListener(
       'message',
       (event) => {
-        if (event.data.height && event.data.type === 'iframe') {
-          setIframeHeight(event.data.height);
+        if (event.data.isFinished && event.data.type === 'iframe') {
+          removeEventListener('message', adjustIframeHeight, true);
         }
       },
       true,
@@ -58,11 +49,7 @@ export default function Preview() {
   });
 
   const showIframe = () => {
-    return (
-      (lastPrototype() || getPrototypeStream()) &&
-      !prototypeM.isError &&
-      !showCode()
-    );
+    return !prototypeM.isError && !showCode();
   };
 
   const iframeHtml = `
@@ -73,40 +60,40 @@ export default function Preview() {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="https://cdn.tailwindcss.com"></script> 
       </head>
-      <body>
-        <div id="content" class="bg-gray-700 w-fit mx-auto pt-2"></div>
+      <body class="bg-gray-100">
+        <div id="content" class="p-5"></div>
         <script>
           window.addEventListener('message', (event) => {
-           document.getElementById('content').innerHTML = event.data;
-           window.parent.postMessage({height: document.documentElement.scrollHeight, type: 'iframe'}, '*');
+           document.getElementById('content').innerHTML = event.data.response;
+           setTimeout(() => {
+            window.parent.postMessage({height: document.documentElement.scrollHeight, type: 'iframe'}, '*');
+            if (event.data.isFinished) {
+              window.parent.postMessage({isFinished: true, type: 'iframe'}, '*');
+            }
+           });
           });
         </script>
       </body>
     </html> 
   `;
 
-  const getData = () => prototypeM.data;
-  const getIsPending = () => prototypeM.isPending;
-  const getIsError = () => prototypeM.isError;
   async function onCopy() {
-    const prettiedHtml = prototypeM.data
-      ? await getPrettiedCode(prototypeM.data)
-      : '';
+    const prettiedHtml = await getPrettiedCode(message.response);
     navigator.clipboard.writeText(prettiedHtml);
     setNotify({ text: 'Copied to clipboard' });
   }
 
   return (
-    <div class="h-full">
-      <Show when={!!getData() && !getIsPending()}>
+    <div class="relative">
+      <Show when={!prototypeM.isError}>
         <ActionsToolbar
           onCode={() => setShowCode(!showCode())}
           onCopy={onCopy}
         />
       </Show>
-      <Show when={prototypeM.isPending && !!getPrototypeStream()}>
+      <Show when={!message.isFinished}>
         <div class="absolute left-6 top-6">
-          <LoadingIcon class="h-8 w-8 animate-spin text-white" />
+          <LoadingIcon class="h-8 w-8 animate-spin text-purple-500" />
         </div>
       </Show>
 
@@ -117,39 +104,22 @@ export default function Preview() {
         title="Preview"
         sandbox="allow-scripts"
         width="100%"
-        height={iframeHeight() | 150}
-        class={`${showIframe() ? '' : 'hidden'}`}
+        height={iframeHeight()}
+        class={`${showIframe() ? '' : 'hidden'} min-h-full`}
       />
 
-      {/* Display Initial Fallback message or source code */}
-      <Show when={!showIframe()}>
-        <Switch>
-          <Match when={showCode()}>
-            <PreviewSourceCode />
-          </Match>
+      <Show when={showCode()}>
+        <PreviewSourceCode code={message.response} />
+      </Show>
 
-          <Match when={!getData() && getIsError()}>
-            <div>
-              <h1 class="text-center text-2xl font-bold text-red-500">Error</h1>
-              <h2 class="mt-4 text-center text-xl font-bold">
-                Please try again
-              </h2>
-              <div>
-                <pre>{JSON.stringify(prototypeM.error, null, 2)}</pre>
-              </div>
-            </div>
-          </Match>
-          <Match when={!getData() && !getIsError()}>
-            <div class="flex items-center justify-center">
-              <img
-                src={getGroovy.src}
-                alt="Let's get groovy!"
-                width={getGroovy.width}
-                height={getGroovy.height}
-              />
-            </div>
-          </Match>
-        </Switch>
+      <Show when={prototypeM.isError}>
+        <div>
+          <h1 class="text-center text-2xl font-bold text-red-500">Error</h1>
+          <h2 class="mt-4 text-center text-xl font-bold">Please try again</h2>
+          <div>
+            <pre>{JSON.stringify(prototypeM.error, null, 2)}</pre>
+          </div>
+        </div>
       </Show>
     </div>
   );

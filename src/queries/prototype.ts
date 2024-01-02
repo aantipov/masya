@@ -1,11 +1,9 @@
 import { createMutation } from '@tanstack/solid-query';
+import { useMessages } from '@/sharedState';
 import ky from 'ky';
-import type { Setter } from 'solid-js';
 
-export function makePrototypeMutation(
-  setLastPrototype: Setter<string>,
-  setPrototypeStream: Setter<string>,
-) {
+export function makePrototypeMutation() {
+  const { setResponse } = useMessages();
   return createMutation(() => ({
     mutationFn: async ({
       prompt,
@@ -16,7 +14,7 @@ export function makePrototypeMutation(
       aiKey: string;
       prototype?: string;
     }) => {
-      setPrototypeStream('');
+      setResponse('');
       let response;
       let url = '/api/prototype';
       try {
@@ -49,7 +47,7 @@ export function makePrototypeMutation(
 
               result += tag;
               tag = '';
-              setPrototypeStream(result || '');
+              setResponse(result || '');
             }
           } catch (error) {
             console.error('Stream reading error:', error);
@@ -66,8 +64,7 @@ export function makePrototypeMutation(
         console.log('Stream reading error:', error);
       }
 
-      setPrototypeStream(result);
-      setLastPrototype(result);
+      setResponse(result, true);
 
       return result;
     },

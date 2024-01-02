@@ -2,10 +2,12 @@ import { Show, createSignal, createEffect } from 'solid-js';
 import EnterKeyIcon from '@/icons/EnterKey';
 import LoadingIcon from '@/icons/Loading';
 import { usePrototypeM, useMessages } from '@/sharedState';
+import clsx from 'clsx/lite';
 
 export default function Input() {
   let userInputRef: HTMLTextAreaElement;
   const [prompt, setPrompt] = createSignal('');
+  const [isFocused, setIsFocused] = createSignal(false);
   const { prototypeM } = usePrototypeM();
   const { addPrompt } = useMessages();
   const handleSubmit = (e: Event) => {
@@ -54,6 +56,8 @@ export default function Input() {
               hasUIGenerated() ? 'Describe changes' : 'Describe your UI'
             }
             value={prompt()}
+            onfocus={() => setIsFocused(true)}
+            onblur={() => setIsFocused(false)}
             onInput={(event) => {
               setPrompt(event.target.value);
               event.target.style.height = 'auto';
@@ -61,17 +65,28 @@ export default function Input() {
             }}
           ></textarea>
           <button
-            class="absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 border-purple-500 bg-purple-500 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out hover:border-purple-600 hover:bg-purple-600 focus:outline-none"
+            class={clsx(
+              'absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out focus:outline-none',
+              !isFocused() && 'border-transparent',
+              isFocused() &&
+                'border-purple-500 bg-purple-500 hover:border-purple-600 hover:bg-purple-600 ',
+            )}
             type={prototypeM.isPending ? 'button' : 'submit'}
           >
             <Show when={!prototypeM.isPending}>
-              <EnterKeyIcon class="h-4 w-4" />
+              <EnterKeyIcon class={clsx('h-4 w-4')} />
             </Show>
             <Show when={prototypeM.isPending}>
               <LoadingIcon class="h-4 w-4 animate-spin text-white" />
             </Show>
           </button>
-          <div class="absolute bottom-0 left-0 right-0 border-b-2 border-purple-400"></div>
+          <div
+            class={clsx(
+              'absolute bottom-0 left-0 right-0 transition-all',
+              !isFocused() && 'border-transparent',
+              isFocused() && 'border-b-2 border-purple-400',
+            )}
+          ></div>
         </div>
       </form>
     </div>

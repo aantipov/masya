@@ -66,10 +66,8 @@ export default function Input() {
           ></textarea>
           <button
             class={clsx(
-              'absolute bottom-0 right-0 mb-2 mr-2 rounded border-4 px-1 py-1 text-sm text-white transition-colors duration-150 ease-in-out focus:outline-none',
-              !isFocused() && 'border-transparent',
-              isFocused() &&
-                'border-purple-500 bg-purple-500 hover:border-purple-600 hover:bg-purple-600 ',
+              'absolute bottom-0 right-0 mb-2 mr-2 rounded p-2 text-sm text-white transition-colors duration-300 ease-in-out focus:outline-none',
+              isFocused() && ' bg-purple-500  hover:bg-purple-600 ',
             )}
             type={prototypeM.isPending ? 'button' : 'submit'}
           >
@@ -82,9 +80,9 @@ export default function Input() {
           </button>
           <div
             class={clsx(
-              'absolute bottom-0 left-0 right-0 transition-all',
-              !isFocused() && 'border-transparent',
-              isFocused() && 'border-b-2 border-purple-400',
+              'absolute bottom-0 left-0 right-0 border-b-2 border-purple-400 transition-transform duration-300',
+              !isFocused() && 'scale-x-0',
+              isFocused() && 'scale-x-100',
             )}
           ></div>
         </div>

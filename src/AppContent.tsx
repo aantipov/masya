@@ -40,7 +40,7 @@ export default function AppContent() {
         <section
           ref={(el) => (scrollableRef = el)}
           style="height: calc(100vh - 200px)"
-          class="group/toolbar _bg-gray-700 container relative mx-auto grow-0 space-y-4 overflow-scroll rounded border border-slate-700 p-6 text-black shadow-xl"
+          class="container relative mx-auto grow-0 space-y-4 overflow-scroll rounded border border-slate-700 p-6 text-black shadow-xl"
         >
           <Show when={messages.length > 0}>
             <For each={messages}>{(item, i) => <Message item={item} />}</For>

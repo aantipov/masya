@@ -84,11 +84,12 @@ export default function Preview({ message }: PropsT) {
   }
 
   return (
-    <div class="relative">
-      <Show when={!prototypeM.isError}>
+    <div class="group/toolbar relative">
+      <Show when={message.isFinished}>
         <ActionsToolbar
           onCode={() => setShowCode(!showCode())}
           onCopy={onCopy}
+          isCodeActive={showCode}
         />
       </Show>
       <Show when={!message.isFinished}>

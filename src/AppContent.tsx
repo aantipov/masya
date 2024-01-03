@@ -59,7 +59,7 @@ export default function AppContent() {
 
         <div class="relative h-32">
           <div class="absolute bottom-8 left-1/2 mx-auto max-w-3xl -translate-x-1/2 transform">
-            <Input />
+            <Input disabled={showAuthModal()} />
           </div>
         </div>
       </div>

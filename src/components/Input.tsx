@@ -4,7 +4,11 @@ import LoadingIcon from '@/icons/Loading';
 import { usePrototypeM, useMessages } from '@/sharedState';
 import clsx from 'clsx/lite';
 
-export default function Input() {
+interface PropsT {
+  disabled: boolean;
+}
+
+export default function Input({ disabled }: PropsT) {
   let userInputRef: HTMLTextAreaElement;
   const [prompt, setPrompt] = createSignal('');
   const [isFocused, setIsFocused] = createSignal(false);
@@ -51,7 +55,7 @@ export default function Input() {
             class="max-h-[150px] flex-1 resize-none overflow-y-scroll rounded border border-gray-700 bg-gray-900 pb-3 pl-3 pr-12 pt-4 leading-tight text-gray-300 placeholder-gray-400 shadow-inner focus:outline-none"
             rows="1"
             aria-label="UI description"
-            disabled={prototypeM.isPending}
+            disabled={prototypeM.isPending || disabled}
             placeholder={
               hasUIGenerated() ? 'Describe changes' : 'Describe your UI'
             }

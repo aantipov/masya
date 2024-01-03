@@ -177,6 +177,12 @@ Your response must adhere to these guidelines:
 1. Format: HTML.
 2. Use existing knowledge.
 
+Make sure the generated UI meets the following requirements:
+- modern, responsive, and accessible.
+- includes only the contents of the <body> tag. Doesn't include the <head> tag or the whole html page.
+- wrapped into a container with a proper background color that contains additional Tailwind classes: "container p-8 mx-auto".
+- has a proper max-width when needed
+
 You are given an existing prototype to improve upon:
 """
 ${String(prototype)}
